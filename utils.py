@@ -12,3 +12,7 @@ def create_white_noise(img_shape=(224, 224), num_channels=3):
 
 def slice_model(model, idx):
     return torch.nn.Sequential(*list(model.children())[:idx])
+
+
+def visdom_show(img, window='test'):
+    vis.image(np.array(img).transpose(2, 0, 1), window)
