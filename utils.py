@@ -1,4 +1,8 @@
+import numpy as np
 import torch
+from visdom import Visdom
+
+vis = Visdom()
 
 
 def freeze_parameters(model):
