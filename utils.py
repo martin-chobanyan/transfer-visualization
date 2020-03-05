@@ -19,4 +19,4 @@ def slice_model(model, idx):
 
 
 def visdom_show(img, window='test'):
-    vis.image(np.array(img).transpose(2, 0, 1), window)
+    vis.image(np.array(img).transpose((2, 0, 1)), window)
