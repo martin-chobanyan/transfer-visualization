@@ -28,11 +28,6 @@ class FourierParameterization:
     std_dev: float, optional
         The standard deviation used by the normal distribution when initializing the Fourier spectrum.
         Lower values will result in lower frequencies (the image will look more gray).
-
-    Returns
-    -------
-    torch.FloatTensor
-        A pytorch tensor containing the Fourier parameterized images.
     """
     def __init__(self, shape, std_dev=0.01, device='cpu'):
         self.batch_size, self.height, self.width, self.channels = shape
@@ -67,7 +62,8 @@ class FourierParameterization:
 
         Returns
         -------
-        The (scaled) pixel space representation of the frequency space initialization
+        torch.FloatTensor
+            The (scaled) pixel space representation of the frequency space initialization
         """
         init_val = init_val * self.scale
         init_val = init_val.permute(1, 2, 3, 4, 0)
