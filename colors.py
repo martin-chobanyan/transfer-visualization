@@ -8,18 +8,23 @@ import torch
 COLOR_CORRELATION_SVD_SQRT = np.asarray([[0.26, 0.09, 0.02],
                                          [0.27, 0.00, -0.05],
                                          [0.27, -0.09, 0.03]]).astype("float32")
-MAX_NORM_SVD_SQRT = np.max(np.linalg.norm(COLOR_CORRELATION_SVD_SQRT, axis=0))
-COLOR_CORRELATION_NORMALIZED = torch.from_numpy(COLOR_CORRELATION_SVD_SQRT / MAX_NORM_SVD_SQRT)
 
 
-def _linear_decorelate_color(t):
-    if t.numel() % 3 != 0:
-        raise ValueError('Input tensor must have three channels!')
-    t_flat = t.view(-1, 3)
-    t_flat = torch.matmul(t_flat, COLOR_CORRELATION_NORMALIZED.T)
-    t = t_flat.view(t.shape)
-    return t
+class DecorrelateColors:
+    def __init__(self, color_corr_svd_sqrt=COLOR_CORRELATION_SVD_SQRT, device='cpu'):
+        self.device = device
+        self.color_corr_svd_sqrt = color_corr_svd_sqrt
+        self.max_norm_svd_sqrt = np.max(np.linalg.norm(self.color_corr_svd_sqrt, axis=0))
+        self.normalized_color_corr = torch.from_numpy(self.color_corr_svd_sqrt / self.max_norm_svd_sqrt).to(self.device)
 
-def to_valid_rgb(t):
-    t = _linear_decorelate_color(t)
-    return torch.sigmoid(t)
+    def __linear_decorrelate_colors(self, t):
+        if t.numel() % 3 != 0:
+            raise ValueError('Input tensor must have three channels!')
+        t_flat = t.view(-1, 3)
+        t_flat = torch.matmul(t_flat, self.normalized_color_corr.T)
+        t = t_flat.view(t.shape)
+        return t
+
+    def __call__(self, t):
+        t = self.__linear_decorrelate_colors(t)
+        return torch.sigmoid(t)
