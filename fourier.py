@@ -13,12 +13,12 @@ def rfft2d_freqs(h, w):
     return np.sqrt(fx * fx + fy * fy)
 
 
-def fourier_parameterized_image(shape=(1, 224, 224, 3), std_dev=0.01):
-    """Create the initial image using the Fourier Transform
+class FourierParameterization:
+    """Initialize an image in the frequency space and define the mapping to the pixel space
 
     Initializing the image with a Gaussian distribution in the pixel space will result in a lot of high frequency
-    artifacts. Instead, this function initializes the Gaussian in the Fourier space and then uses the inverse Fourier
-    Transform to bring the image back to the pixel space.
+    artifacts. Instead, this class initializes the Gaussian in the Fourier space. Optimizing this
+    Fourier parameterization will have a regularizing effect on the feature visualization.
 
     Parameters
     ----------
@@ -34,17 +34,45 @@ def fourier_parameterized_image(shape=(1, 224, 224, 3), std_dev=0.01):
     torch.FloatTensor
         A pytorch tensor containing the Fourier parameterized images.
     """
-    batch, h, w, ch = shape
-    freqs = rfft2d_freqs(h, w)
-    init_val_size = (2, batch, ch) + freqs.shape
-    init_val = torch.empty(init_val_size).normal_(std=std_dev)
+    def __init__(self, shape, std_dev=0.01, device='cpu'):
+        self.batch_size, self.height, self.width, self.channels = shape
+        self.std_dev = std_dev
+        self.device = device
 
-    scale = 1.0 / np.maximum(freqs, 1.0 / max(w, h))
-    scale = torch.from_numpy(scale).float()
-    init_val *= scale
+        # define the sampled frequencies to use in the Fourier spectrum
+        # (this will only be used to scale the random initializations)
+        self.freqs = rfft2d_freqs(self.height, self.width)
+        self.init_val_size = (2, self.batch_size, self.channels) + self.freqs.shape
 
-    init_val = init_val.permute(1, 2, 3, 4, 0)
-    image = torch.irfft(init_val, signal_ndim=2, normalized=True, onesided=True, signal_sizes=(h, w))
-    image = image / 4.0  # the four here is a magic number defined in the lucid implementation
+        # define the scaling
+        self.scale = 1.0 / np.maximum(self.freqs, 1.0 / max(self.height, self.width))
+        self.scale = torch.from_numpy(self.scale).float().to(self.device)
 
-    return image
+    def init_spectrum(self):
+        """Initialize the Fourier spectrum using a normal distribution
+
+        Returns
+        -------
+        torch.FloatTensor
+        """
+        return torch.empty(self.init_val_size).normal_(std=self.std_dev)
+
+    def map_to_pixel_space(self, init_val):
+        """Map the initialized frequency space values to the pixel space
+
+        Parameters
+        ----------
+        init_val: torch.FloatTensor
+            The output of the `init_spectrum` method
+
+        Returns
+        -------
+        The (scaled) pixel space representation of the frequency space initialization
+        """
+        init_val = init_val * self.scale
+        init_val = init_val.permute(1, 2, 3, 4, 0)
+
+        image_shape = (self.height, self.width)
+        image = torch.irfft(init_val, signal_ndim=2, normalized=True, onesided=True, signal_sizes=image_shape)
+        image /= 4.0  # the four here is a magic number defined in the lucid implementation
+        return image
