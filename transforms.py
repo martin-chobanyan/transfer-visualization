@@ -7,6 +7,16 @@ import torch
 from kornia.geometry import rotate, scale, translate
 
 
+class CropTensorPadding:
+    def __init__(self, padding):
+        self.padding = padding
+
+    def __call__(self, x):
+        p = self.padding
+        x = x[..., p:-p, p:-p]
+        return x
+
+
 class RotateTensor:
     """Rotate a pytorch tensor
 
@@ -19,13 +29,15 @@ class RotateTensor:
         A list of rotation angles to sample from
     """
 
-    def __init__(self, angles):
+    def __init__(self, angles, device='cpu'):
         self.angles = angles
+        self.device = device
 
     def __call__(self, x):
         batch_size = x.size(0)
         angles = random.choices(self.angles, k=batch_size)
-        return rotate(x, torch.tensor(angles))
+        angles = torch.tensor(angles).to(self.device)
+        return rotate(x, angles)
 
 
 class ScaleTensor:
@@ -38,13 +50,15 @@ class ScaleTensor:
     scale_factors: list[float]
         A list of scale factors to choose from for each image
     """
-    def __init__(self, scale_factors):
+    def __init__(self, scale_factors, device='cpu'):
         self.scale_factors = scale_factors
+        self.device = device
 
     def __call__(self, x):
         batch_size = x.size(0)
         scale_factors = random.choices(self.scale_factors, k=batch_size)
-        return scale(x, torch.tensor(scale_factors))
+        scale_factors = torch.tensor(scale_factors).to(self.device)
+        return scale(x, scale_factors)
 
 
 class TranslateTensor:
@@ -60,16 +74,12 @@ class TranslateTensor:
         The direction of the shift is randomly chosen for both dimensions.
     """
 
-    def __init__(self, shift):
+    def __init__(self, shift, device='cpu'):
         self.shift = float(shift)
+        self.device = device
 
     def __call__(self, x):
         batch_size = x.size(0)
         options = torch.tensor([self.shift, -self.shift])
-        shifts = options[torch.randint(0, 2, (batch_size, 2))]
+        shifts = options[torch.randint(0, 2, (batch_size, 2))].to(self.device)
         return translate(x, shifts)
-
-        # select the amount to shift in both directions
-        # h = random.choice([self.shift, -self.shift])
-        # v = random.choice([self.shift, -self.shift])
-        # return translate(x, torch.tensor([[h, v]]))
