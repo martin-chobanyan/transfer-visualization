@@ -5,7 +5,7 @@ This module provides helper objects for transforming image tensors using the kor
 import random
 import torch
 from kornia.geometry import rotate, scale, translate
-
+from utils import torch_uniform
 
 class CropTensorPadding:
     def __init__(self, padding):
@@ -50,6 +50,7 @@ class ScaleTensor:
     scale_factors: list[float]
         A list of scale factors to choose from for each image
     """
+
     def __init__(self, scale_factors, device='cpu'):
         self.scale_factors = scale_factors
         self.device = device
@@ -69,17 +70,17 @@ class TranslateTensor:
 
     Parameters
     ----------
-    shift: float
-        The amount to shift the tensor along its height and width dimensions.
+    max_shift: int
+        The maximum amount to shift the tensor along its height and width dimensions.
         The direction of the shift is randomly chosen for both dimensions.
     """
 
-    def __init__(self, shift, device='cpu'):
-        self.shift = float(shift)
+    def __init__(self, max_shift, device='cpu'):
+        self.shift = max_shift
         self.device = device
 
     def __call__(self, x):
         batch_size = x.size(0)
-        options = torch.tensor([self.shift, -self.shift])
-        shifts = options[torch.randint(0, 2, (batch_size, 2))].to(self.device)
+        shifts = torch_uniform(-self.shift, self.shift, (batch_size, 2)).to(self.device)
         return translate(x, shifts)
+

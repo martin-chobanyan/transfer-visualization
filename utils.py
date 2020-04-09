@@ -18,5 +18,9 @@ def slice_model(model, idx):
     return torch.nn.Sequential(*list(model.children())[:idx])
 
 
+def torch_uniform(low, high, size):
+    return (high - low) * torch.rand(size) + low
+
+
 def visdom_show(img, window='test'):
     vis.image(np.array(img).transpose((2, 0, 1)), window)
