@@ -6,9 +6,9 @@ from torchvision.transforms import ToPILImage
 from tqdm import tqdm
 
 # local imports
-from colors import DecorrelateColors
-from fourier import FourierParam
-from transforms import get_default_transforms
+from .colors import DecorrelateColors
+from .fourier import FourierParam
+from .transforms import get_default_transforms
 
 
 class FeatureVisualizer:
