@@ -29,7 +29,7 @@ class FeatureVisualizer:
 
         # set the default fourier parameterization and color decorrelation objects
         if self.fourier_param is None:
-            self.fourier_param = FourierParam(shape=(1, *img_shape, 3),
+            self.fourier_param = FourierParam(shape=(*img_shape, 3),
                                               device=self.device)
         if self.color_decorr is None:
             self.color_decorr = DecorrelateColors(device=self.device)

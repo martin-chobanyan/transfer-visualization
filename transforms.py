@@ -9,6 +9,30 @@ from torchvision.transforms import Compose, Normalize
 from kornia.geometry import rotate, scale, translate
 from utils import torch_uniform
 
+IMAGENET_MEANS = [0.485, 0.456, 0.406]
+IMAGENET_STDEVS = [0.229, 0.224, 0.225]
+
+
+# the default set of transformations matches those as in the "Feature Visualization" distill article
+# https://distill.pub/2017/feature-visualization/
+def get_default_transforms(device):
+    return Compose([
+        Normalize(mean=IMAGENET_MEANS, std=IMAGENET_STDEVS),
+        AddBatchDim(),
+        ReflectionPad2d(16),
+        TranslateTensor(max_shift=16, device=device),
+        ScaleTensor(scale_factors=[1, 0.975, 1.025, 0.95, 1.05], device=device),
+        RotateTensor(angles=list(range(-5, 6)), device=device),
+        TranslateTensor(max_shift=8, device=device),
+        CropTensorPadding(16)
+    ])
+
+
+
+class AddBatchDim:
+    def __call__(self, t):
+        return t.unsqueeze(0)
+
 
 class CropTensorPadding:
     def __init__(self, padding):
@@ -86,21 +110,3 @@ class TranslateTensor:
         batch_size = x.size(0)
         shifts = torch_uniform(-self.shift, self.shift, (batch_size, 2)).to(self.device)
         return translate(x, shifts)
-
-
-IMAGENET_MEANS = [0.485, 0.456, 0.406]
-IMAGENET_STDEVS = [0.229, 0.224, 0.225]
-
-
-# the default set of transformations matches those as in the "Feature Visualization" distill article
-# https://distill.pub/2017/feature-visualization/
-def get_default_transforms(device):
-    return Compose([
-        # Normalize(mean=IMAGENET_MEANS, std=IMAGENET_STDEVS),
-        ReflectionPad2d(16),
-        TranslateTensor(max_shift=16, device=device),
-        ScaleTensor(scale_factors=[1, 0.975, 1.025, 0.95, 1.05], device=device),
-        RotateTensor(angles=list(range(-5, 6)), device=device),
-        TranslateTensor(max_shift=8, device=device),
-        CropTensorPadding(16)
-    ])

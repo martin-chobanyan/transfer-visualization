@@ -30,7 +30,7 @@ class FourierParam:
         Lower values will result in lower frequencies (the image will look more gray).
     """
     def __init__(self, shape, std_dev=0.01, decay_power=1.0, device='cpu'):
-        self.batch_size, self.height, self.width, self.channels = shape
+        self.height, self.width, self.channels = shape
         self.std_dev = std_dev
         self.decay_power = decay_power
         self.device = device
@@ -38,7 +38,7 @@ class FourierParam:
         # define the sampled frequencies to use in the Fourier spectrum
         # (this will only be used to scale the random initializations)
         self.freqs = rfft2d_freqs(self.height, self.width)
-        self.init_val_size = (2, self.batch_size, self.channels) + self.freqs.shape
+        self.init_val_size = (2, self.channels) + self.freqs.shape
 
         # define the scaling
         self.scale = 1.0 / np.maximum(self.freqs, 1.0 / max(self.height, self.width)) ** self.decay_power
@@ -67,7 +67,7 @@ class FourierParam:
             The (scaled) pixel space representation of the frequency space initialization
         """
         init_val = init_val * self.scale
-        init_val = init_val.permute(1, 2, 3, 4, 0)
+        init_val = init_val.permute(1, 2, 3, 0)
 
         image_shape = (self.height, self.width)
         image = torch.irfft(init_val, signal_ndim=2, normalized=True, onesided=True, signal_sizes=image_shape)
