@@ -18,11 +18,12 @@ class DecorrelateColors:
         self.normalized_color_corr = torch.from_numpy(self.color_corr_svd_sqrt / self.max_norm_svd_sqrt).to(self.device)
 
     def __linear_decorrelate_colors(self, t):
-        if t.numel() % 3 != 0:
-            raise ValueError('Input tensor must have three channels!')
-        t_flat = t.view(-1, 3)
+        b, c, h, w = t.shape
+        assert c == 3, 'Input tensor must have three channels!'
+        t_flat = t.permute(0, 2, 3, 1)
+        t_flat = t_flat.view(-1, 3)
         t_flat = torch.matmul(t_flat, self.normalized_color_corr.T)
-        t = t_flat.view(t.shape)
+        t = t_flat.view((b, h, w, c)).permute(0, 3, 1, 2)
         return t
 
     def __call__(self, t):

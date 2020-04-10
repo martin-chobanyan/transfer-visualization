@@ -13,7 +13,7 @@ def rfft2d_freqs(h, w):
     return np.sqrt(fx * fx + fy * fy)
 
 
-class FourierParameterization:
+class FourierParam:
     """Initialize an image in the frequency space and define the mapping to the pixel space
 
     Initializing the image with a Gaussian distribution in the pixel space will result in a lot of high frequency
