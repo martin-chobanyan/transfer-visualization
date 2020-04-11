@@ -1,43 +1,14 @@
-import os
-
-from pandas import read_csv
-from PIL import Image
-from sklearn.preprocessing import LabelEncoder
-from torch.utils.data import Dataset
-
-
-class DogBreedDataset(Dataset):
-    def __init__(self, root_dir, transforms=None):
-        super().__init__()
-        self.root_dir = root_dir
-        self.transforms = transforms
-        self.img_dir = os.path.join(root_dir, 'train')
-
-        dog_df = read_csv(os.path.join(root_dir, 'labels.csv'))
-        self.dog_ids = dog_df['id'].values
-
-        self.label_encoder = LabelEncoder()
-        self.labels = self.label_encoder.fit_transform(dog_df['breed'].values)
-
-    @property
-    def breeds(self):
-        return self.label_encoder.classes_
-
-    def __getitem__(self, item):
-        image = Image.open(os.path.join(self.img_dir, f'{self.dog_ids[item]}.jpg'))
-        label = self.labels[item]
-        if self.transforms is not None:
-            image = self.transforms(image)
-        return image, label
-
-    def __len__(self):
-        return len(self.dog_ids)
-
+from torch.utils.data import random_split
+from dataset import DogBreedDataset
 
 if __name__ == '__main__':
-    root_dir = '/home/mchobanyan/data/kaggle/dog_breeds/'
-    dataset = DogBreedDataset(root_dir)
-    img, label = dataset[200]
-    img.show()
-    print(label)
-    print(list(zip(range(len(dataset.breeds)), dataset.breeds)))
+    # define the dog breed dataset
+    dataset = DogBreedDataset(root_dir='/home/mchobanyan/data/kaggle/dog_breeds/')
+    n_dogs = len(dataset)
+
+    # randomly split the dataset into train and test
+    n_train = int(0.8 * n_dogs)
+    n_test = n_dogs - n_train
+    train_data, test_data = random_split(dataset, [n_train, n_test])
+
+    print(len(train_data), len(test_data))
