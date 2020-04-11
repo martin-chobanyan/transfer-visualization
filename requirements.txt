@@ -1,5 +1,0 @@
-torch >= 1.1.0
-torchvision >= 0.3.0
-numpy >= 1.16.4
-kornia >= 0.2.0
-tqdm >= 4.42.1

@@ -5,6 +5,7 @@ from PIL import Image
 from sklearn.preprocessing import LabelEncoder
 from torch.utils.data import Dataset
 
+
 class DogBreedDataset(Dataset):
     def __init__(self, root_dir, transforms=None):
         super().__init__()
@@ -31,6 +32,7 @@ class DogBreedDataset(Dataset):
 
     def __len__(self):
         return len(self.dog_ids)
+
 
 if __name__ == '__main__':
     root_dir = '/home/mchobanyan/data/kaggle/dog_breeds/'
