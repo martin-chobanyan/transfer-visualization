@@ -49,6 +49,7 @@ class FeatureVisualizer:
                  optim=None,
                  maximize=True,
                  progress=True,
+                 hook_output_fn=None,
                  *args,
                  **kwargs):
         # initialize the image in fourier space
@@ -71,6 +72,9 @@ class FeatureVisualizer:
             img = self.transforms(img)
 
             out = self.model(img)[0]
+            if hook_output_fn is not None:
+                out = hook_output_fn(self.model)
+
             act = mean(out[act_idx])
             if maximize:
                 act *= -1
