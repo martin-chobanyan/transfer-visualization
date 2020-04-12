@@ -10,12 +10,12 @@ class TrainingLogger:
         with open(filepath, 'w') as file:
             header = ['Epoch', 'Train Loss', 'Test Loss', 'Train Accuracy', 'Test Accuracy']
             writer = csv_writer(file)
-            writer.write(header)
+            writer.writerow(header)
 
-    def __call__(self, epoch, train_loss, test_loss, train_acc, test_acc):
+    def add_entry(self, epoch, train_loss, test_loss, train_acc, test_acc):
         with open(self.filepath, 'a') as file:
             writer = csv_writer(file)
-            writer.write([train_loss, test_loss, train_acc, test_acc])
+            writer.writerow([epoch, train_loss, test_loss, train_acc, test_acc])
 
 
 def accuracy(model_out, true_labels):
@@ -54,6 +54,7 @@ def train_epoch(model, dataloader, criterion, optimizer, device):
         The average loss
     """
     avg_loss = []
+    avg_acc = []
     model.train()
     for batch_image, batch_label in dataloader:
         batch_image = batch_image.to(device)
@@ -63,8 +64,10 @@ def train_epoch(model, dataloader, criterion, optimizer, device):
         loss = criterion(output, batch_label)
         loss.backward()
         optimizer.step()
+        acc = accuracy(output, batch_label)
         avg_loss.append(loss.item())
-    return sum(avg_loss) / len(avg_loss)
+        avg_acc.append(acc)
+    return sum(avg_loss) / len(avg_loss), sum(avg_acc) / len(avg_acc)
 
 
 def test_epoch(model, dataloader, criterion, device):
