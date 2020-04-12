@@ -1,5 +1,22 @@
+from csv import writer as csv_writer
+
 import torch
 import torch.nn.functional as F
+
+
+class TrainingLogger:
+    def __init__(self, filepath):
+        self.filepath = filepath
+        with open(filepath, 'w') as file:
+            header = ['Epoch', 'Train Loss', 'Test Loss', 'Train Accuracy', 'Test Accuracy']
+            writer = csv_writer(file)
+            writer.write(header)
+
+    def __call__(self, epoch, train_loss, test_loss, train_acc, test_acc):
+        with open(self.filepath, 'a') as file:
+            writer = csv_writer(file)
+            writer.write([train_loss, test_loss, train_acc, test_acc])
+
 
 def accuracy(model_out, true_labels):
     """Calculate the accuracy of a batch of predictions
