@@ -5,7 +5,6 @@ from PIL import Image
 from sklearn.preprocessing import LabelEncoder
 from torch.utils.data import Dataset
 
-
 class DogBreedDataset(Dataset):
     def __init__(self, root_dir, transforms=None):
         super().__init__()
@@ -24,11 +23,11 @@ class DogBreedDataset(Dataset):
         return self.label_encoder.classes_
 
     def __getitem__(self, item):
-        image = Image.open(os.path.join(self.img_dir, f'{self.dog_ids[item]}.jpg'))
+        img = Image.open(os.path.join(self.img_dir, f'{self.dog_ids[item]}.jpg'))
         label = self.labels[item]
         if self.transforms is not None:
-            image = self.transforms(image)
-        return image, label
+            img = self.transforms(img)
+        return img, label
 
     def __len__(self):
         return len(self.dog_ids)
