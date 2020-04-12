@@ -1,13 +1,18 @@
-import numpy as np
 import torch
-from visdom import Visdom
 
-vis = Visdom()
+
+def _set_param_training_status(model, status):
+    for param in model.parameters():
+        param.requires_grad = status
+    return model
 
 
 def freeze_parameters(model):
-    for param in model.parameters():
-        param.requires_grad = False
+    return _set_param_training_status(model, status=False)
+
+
+def unfreeze_parameters(model):
+    return _set_param_training_status(model, status=True)
 
 
 def create_white_noise(img_shape=(224, 224), num_channels=3):
@@ -20,7 +25,3 @@ def slice_model(model, idx):
 
 def torch_uniform(low, high, size):
     return (high - low) * torch.rand(size) + low
-
-
-def visdom_show(img, window='test'):
-    vis.image(np.array(img).transpose((2, 0, 1)), window)
