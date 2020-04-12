@@ -1,7 +1,13 @@
+import os
 from csv import writer as csv_writer
 
 import torch
 import torch.nn.functional as F
+
+
+def create_folder(path):
+    if not (os.path.exists(path) or os.path.isdir(path)):
+        os.makedirs(path, exist_ok=True)
 
 
 class TrainingLogger:

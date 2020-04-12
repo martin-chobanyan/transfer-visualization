@@ -1,5 +1,3 @@
-import os
-
 import torch
 import torch.nn as nn
 from torch.optim import Adam
@@ -14,15 +12,34 @@ from dataset import DogBreedDataset
 from train_utils import *
 
 
-def load_resnet50_layer4(num_classes):
-    # load a pretrained resnet-50 and freeze all of its parameters
+def load_resnet50_layer3_bottleneck5(num_classes):
+    """
+    Loads a pretrained resnet-50, swaps the fully connected layer,
+    and freezes all parameters except for those in layer3.bottleneck5, layer4 and the fully connected layer.
+    """
     resnet_model = resnet50(pretrained=True)
     resnet_model = freeze_parameters(resnet_model)
 
-    # make all modules in layer 4 trainable
+    unfreeze_parameters(resnet_model.layer3[5])
     unfreeze_parameters(resnet_model.layer4)
 
-    # swap the fully connected layer
+    fc_input_dim = resnet_model.fc.in_features
+    new_fc = nn.Linear(fc_input_dim, num_classes)
+    resnet_model.fc = new_fc
+
+    return resnet_model
+
+
+def load_resnet50_layer4(num_classes):
+    """
+    Loads a pretrained resnet-50, swaps the fully connected layer,
+    and freezes all parameters except for those in layer4 and the fully connected layer.
+    """
+    resnet_model = resnet50(pretrained=True)
+    resnet_model = freeze_parameters(resnet_model)
+
+    unfreeze_parameters(resnet_model.layer4)
+
     fc_input_dim = resnet_model.fc.in_features
     new_fc = nn.Linear(fc_input_dim, num_classes)
     resnet_model.fc = new_fc
@@ -34,7 +51,7 @@ if __name__ == '__main__':
     # define the constants
     IMAGE_SHAPE = (400, 400)
     P_TRAIN = 0.8
-    BATCH_SIZE = 128
+    BATCH_SIZE = 100
 
     # define the dog breed dataset
     root_dir = '/home/mchobanyan/data/kaggle/dog_breeds/'
@@ -60,16 +77,19 @@ if __name__ == '__main__':
 
     # set up the model
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    model = load_resnet50_layer4(n_breeds)
+    model = load_resnet50_layer3_bottleneck5(n_breeds)
     model = model.to(device)
 
     learning_rate = 0.00001
     criterion = nn.CrossEntropyLoss()
     optimizer = Adam(model.parameters(), lr=learning_rate)
 
-    num_epochs = 200
-    output_dir = '/home/mchobanyan/data/research/transfer/vis/finetune-layer4-finetune'
+    # set up the output directory
+    output_dir = '/home/mchobanyan/data/research/transfer/vis/finetune-resnet50-layer3-bottleneck5'
+    create_folder(os.path.join(output_dir, 'models'))
     logger = TrainingLogger(filepath=os.path.join(output_dir, 'training-log.csv'))
+
+    num_epochs = 200
     for epoch in tqdm(range(num_epochs)):
         train_loss, train_acc = train_epoch(model, train_loader, criterion, optimizer, device)
         test_loss, test_acc = train_epoch(model, test_loader, criterion, optimizer, device)
