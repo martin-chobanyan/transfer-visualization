@@ -44,7 +44,7 @@ class FeatureVisualizer:
 
     def __call__(self,
                  act_idx,
-                 epochs=200,
+                 epochs=256,
                  lr=0.05,
                  optim=None,
                  maximize=True,
