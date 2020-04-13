@@ -11,6 +11,11 @@ from feature_vis.utils import freeze_parameters, unfreeze_parameters
 from dataset import DogBreedDataset
 from train_utils import *
 
+# define the constants
+IMAGE_SHAPE = (400, 400)
+P_TRAIN = 0.8
+BATCH_SIZE = 100
+
 
 def load_resnet50_layer3_bottleneck5(num_classes):
     """
@@ -48,11 +53,6 @@ def load_resnet50_layer4(num_classes):
 
 
 if __name__ == '__main__':
-    # define the constants
-    IMAGE_SHAPE = (400, 400)
-    P_TRAIN = 0.8
-    BATCH_SIZE = 100
-
     # define the dog breed dataset
     root_dir = '/home/mchobanyan/data/kaggle/dog_breeds/'
     transforms = Compose([
@@ -94,4 +94,4 @@ if __name__ == '__main__':
         train_loss, train_acc = train_epoch(model, train_loader, criterion, optimizer, device)
         test_loss, test_acc = train_epoch(model, test_loader, criterion, optimizer, device)
         logger.add_entry(epoch, train_loss, test_loss, train_acc, test_acc)
-        checkpoint(model, os.path.join(output_dir, 'models', f'model_epoch{epoch}'))
+        checkpoint(model, os.path.join(output_dir, 'models', f'model_epoch{epoch}.pt'))
