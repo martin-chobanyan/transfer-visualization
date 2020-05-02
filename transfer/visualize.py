@@ -28,7 +28,7 @@ if __name__ == '__main__':
     output_dir = os.path.join(feature_dir, 'finetune-resnet50-layer3-bottleneck5')
     model_dir = os.path.join(root_dir, 'models')
 
-    channels = list(range(300, 400))
+    channels = list(range(500, 600))
     for channel_idx in channels:
         create_folder(os.path.join(output_dir, f'channel{channel_idx}'))
 
