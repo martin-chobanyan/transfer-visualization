@@ -21,40 +21,78 @@ def visualize_model(model, channels, device, img_shape=IMAGE_SHAPE, output_dir=N
     return features
 
 
-if __name__ == '__main__':
-    device = get_device()
-    model = load_resnet50_layer3_bottleneck5(num_classes=120)
-    model = model.to(device)
-
-    root_dir = '/home/mchobanyan/data/research/transfer/vis/finetune-dog-resnet50/'
-    model_dir = os.path.join(root_dir, 'models')
+def visualize_resnet50_layer3_bottleneck5(resnet_model, root_dir, device):
+    """Visualize the channel features for the model at layer3-bottleneck5"""
     output_dir = os.path.join(root_dir, 'features', 'layer3-bottleneck5')
     create_folder(output_dir)
+
+    model_subset = slice_model(resnet_model, 7)  # this gets us the output of layer3-bottleneck5
+    model_subset = model_subset.eval()
+
+    num_channels = 1024
+    return visualize_model(model_subset, range(num_channels), device, output_dir=output_dir)
+
+
+def visualize_resnet50_layer4_bottleneck0(resnet_model, root_dir, device):
+    """Visualize the channel features for the model at layer3-bottleneck5"""
+    output_dir = os.path.join(root_dir, 'features', 'layer4-bottleneck0')
+    create_folder(output_dir)
+
+    model_subset = slice_model(resnet_model, 7)  # this gets us the output of layer3-bottleneck5
+    model_subset.add_module('layer4_bottleneck0', resnet_model.layer4[0])
+    model_subset = model_subset.eval()
+
+    num_channels = 2048
+    return visualize_model(model_subset, range(num_channels), device, output_dir=output_dir)
+
+
+def visualize_resnet50_layer4_bottleneck1(resnet_model, root_dir, device):
+    """Visualize the channel features for the model at layer3-bottleneck5"""
+    output_dir = os.path.join(root_dir, 'features', 'layer4-bottleneck1')
+    create_folder(output_dir)
+
+    model_subset = slice_model(resnet_model, 7)  # this gets us the output of layer3-bottleneck5
+    model_subset.add_module('layer4_bottleneck0', resnet_model.layer4[0])
+    model_subset.add_module('layer4_bottleneck1', resnet_model.layer4[1])
+    model_subset = model_subset.eval()
+
+    num_channels = 2048
+    return visualize_model(model_subset, range(num_channels), device, output_dir=output_dir)
+
+
+def visualize_resnet50_layer4_bottleneck2(resnet_model, root_dir, device):
+    """Visualize the channel features for the model at layer3-bottleneck5"""
+    output_dir = os.path.join(root_dir, 'features', 'layer4-bottleneck2')
+    create_folder(output_dir)
+
+    model_subset = slice_model(resnet_model, 8)  # this gets us the output of layer4-bottleneck2
+    model_subset = model_subset.eval()
+
+    num_channels = 2048
+    return visualize_model(model_subset, range(num_channels), device, output_dir=output_dir)
+
+
+if __name__ == '__main__':
+    DEVICE = get_device()
+    model = load_resnet50_layer3_bottleneck5(num_classes=120)
+    model = model.to(DEVICE)
+
+    ROOT_DIR = '/home/mchobanyan/data/research/transfer/vis/finetune-dog-resnet50/'
+    model_dir = os.path.join(ROOT_DIR, 'models')
 
     # load the state of the model at the 60th epoch
     epoch_idx = 59
     state_dict = torch.load(os.path.join(model_dir, f'model_epoch{epoch_idx}.pt'))
     model.load_state_dict(state_dict)
-    model_subset = slice_model(model, 7)  # this gets us the output of layer3-bottleneck5
-    model_subset = model_subset.eval()
 
-    # visualize the channel features for the model at layer3-bottleneck5
-    num_channels = 1024
-    images = visualize_model(model_subset, range(num_channels), device, output_dir=output_dir)
+    print('Visualizing layer3-bottleneck5:')
+    visualize_resnet50_layer3_bottleneck5(model, ROOT_DIR, DEVICE)
 
-    # channels = list(range(500, 600))
-    # for channel_idx in channels:
-    #     create_folder(os.path.join(output_dir, f'channel{channel_idx}'))
-    # n_models = len(os.listdir(model_dir))
-    # # for i in tqdm(range(n_models)):
-    # for i in [80]:
-    #     filename = f'model_epoch{i}.pt'
-    #     state_dict = torch.load(os.path.join(model_dir, filename))
-    #     model.load_state_dict(state_dict)
-    #     model_subset = slice_model(model, 7)  # layer 3 bottleneck 5
-    #     # model_subset = slice_model(model, 8)  # layer 4 bottleneck 2
-    #     model_subset = model_subset.eval()
-    #
-    #     result = visualize_model(model_subset, channels, device)
-    #     for channel_idx, img in result.items():
-    #         img.save(os.path.join(output_dir, f'channel{channel_idx}', f'channel{channel_idx}_epoch{i}.png'))
+    print('\nVisualizing layer4-bottleneck0:')
+    visualize_resnet50_layer4_bottleneck0(model, ROOT_DIR, DEVICE)
+
+    print('\nVisualizing layer4-bottleneck1:')
+    visualize_resnet50_layer4_bottleneck1(model, ROOT_DIR, DEVICE)
+
+    print('\nVisualizing layer4-bottleneck2:')
+    visualize_resnet50_layer4_bottleneck2(model, ROOT_DIR, DEVICE)
