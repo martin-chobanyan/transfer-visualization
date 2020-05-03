@@ -6,7 +6,7 @@ from tqdm import tqdm
 from feature_vis.render import FeatureVisualizer
 from feature_vis.utils import slice_model
 from finetune_dog_classifier import load_resnet50_layer3_bottleneck5, IMAGE_SHAPE
-from train_utils import create_folder
+from train_utils import create_folder, get_device
 
 
 def visualize_model(model, channels, device, img_shape=IMAGE_SHAPE):
@@ -19,7 +19,7 @@ def visualize_model(model, channels, device, img_shape=IMAGE_SHAPE):
 
 
 if __name__ == '__main__':
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    device = get_device()
     model = load_resnet50_layer3_bottleneck5(num_classes=120)
     model = model.to(device)
 

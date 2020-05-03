@@ -10,6 +10,18 @@ def create_folder(path):
         os.makedirs(path, exist_ok=True)
 
 
+def get_device():
+    """Get the cuda device if it is available
+
+    Note: this assumes that there is only one GPU device
+
+    Returns
+    -------
+    torch.device
+    """
+    return torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+
 class TrainingLogger:
     def __init__(self, filepath):
         self.filepath = filepath

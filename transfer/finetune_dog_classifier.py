@@ -1,4 +1,5 @@
-import torch
+import os
+
 import torch.nn as nn
 from torch.optim import Adam
 from torch.utils.data import DataLoader, random_split
@@ -9,7 +10,7 @@ from tqdm import tqdm
 from feature_vis.transforms import IMAGENET_MEANS, IMAGENET_STDEVS
 from feature_vis.utils import freeze_parameters, unfreeze_parameters
 from dataset import DogBreedDataset
-from train_utils import *
+from train_utils import checkpoint, create_folder, get_device, train_epoch, test_epoch, TrainingLogger
 
 # define the constants
 IMAGE_SHAPE = (400, 400)
@@ -78,7 +79,7 @@ if __name__ == '__main__':
     test_loader = DataLoader(test_data, batch_size=BATCH_SIZE, shuffle=False)
 
     # set up the model
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    device = get_device()
     model = load_resnet50_layer3_bottleneck5(num_breeds)
     model = model.to(device)
 
