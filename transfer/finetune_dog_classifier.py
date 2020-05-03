@@ -15,6 +15,8 @@ from train_utils import *
 IMAGE_SHAPE = (400, 400)
 P_TRAIN = 0.8
 BATCH_SIZE = 100
+LEARNING_RATE = 0.00001
+NUM_EPOCHS = 60
 
 
 def load_resnet50_layer3_bottleneck5(num_classes):
@@ -63,35 +65,33 @@ if __name__ == '__main__':
         Normalize(IMAGENET_MEANS, IMAGENET_STDEVS)
     ])
     dataset = DogBreedDataset(root_dir, transforms)
-    n_dogs = len(dataset)
-    n_breeds = len(dataset.breeds)
+    num_dogs = len(dataset)
+    num_breeds = len(dataset.breeds)
 
     # randomly split the dataset into train and test
-    n_train = int(P_TRAIN * n_dogs)
-    n_test = n_dogs - n_train
-    train_data, test_data = random_split(dataset, [n_train, n_test])
+    num_train = int(P_TRAIN * num_dogs)
+    num_test = num_dogs - num_train
+    train_data, test_data = random_split(dataset, [num_train, num_test])
 
     # set up the train and test data loaders
     train_loader = DataLoader(train_data, batch_size=BATCH_SIZE, shuffle=True)
-    test_loader = DataLoader(test_data, batch_size=BATCH_SIZE, shuffle=True)
+    test_loader = DataLoader(test_data, batch_size=BATCH_SIZE, shuffle=False)
 
     # set up the model
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    model = load_resnet50_layer3_bottleneck5(n_breeds)
+    model = load_resnet50_layer3_bottleneck5(num_breeds)
     model = model.to(device)
 
-    learning_rate = 0.00001
     criterion = nn.CrossEntropyLoss()
-    optimizer = Adam(model.parameters(), lr=learning_rate)
+    optimizer = Adam(model.parameters(), lr=LEARNING_RATE)
 
     # set up the output directory
-    output_dir = '/home/mchobanyan/data/research/transfer/vis/finetune-resnet50-layer3-bottleneck5'
+    output_dir = '/home/mchobanyan/data/research/transfer/vis/finetune-dog-resnet50'
     create_folder(os.path.join(output_dir, 'models'))
     logger = TrainingLogger(filepath=os.path.join(output_dir, 'training-log.csv'))
 
-    num_epochs = 200
-    for epoch in tqdm(range(num_epochs)):
+    for epoch in tqdm(range(NUM_EPOCHS)):
         train_loss, train_acc = train_epoch(model, train_loader, criterion, optimizer, device)
-        test_loss, test_acc = train_epoch(model, test_loader, criterion, optimizer, device)
+        test_loss, test_acc = test_epoch(model, test_loader, criterion, device)
         logger.add_entry(epoch, train_loss, test_loss, train_acc, test_acc)
         checkpoint(model, os.path.join(output_dir, 'models', f'model_epoch{epoch}.pt'))
