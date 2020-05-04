@@ -1,6 +1,7 @@
 import os
 
 import torch
+from torchvision.models import resnet50
 from tqdm import tqdm
 
 from feature_vis.render import FeatureVisualizer
@@ -72,7 +73,28 @@ def visualize_resnet50_layer4_bottleneck2(resnet_model, root_dir, device):
     return visualize_model(model_subset, range(num_channels), device, output_dir=output_dir)
 
 
-if __name__ == '__main__':
+def visualize_imagenet_classifier():
+    print('Visualizing resnet50 features pre-trained on ImageNet')
+    DEVICE = get_device()
+    model = resnet50(pretrained=True)
+    model = model.to(DEVICE)
+
+    ROOT_DIR = '/home/mchobanyan/data/research/transfer/vis/pretrained-resnet50'
+
+    print('Visualizing layer3-bottleneck5:')
+    visualize_resnet50_layer3_bottleneck5(model, ROOT_DIR, DEVICE)
+
+    print('\nVisualizing layer4-bottleneck0:')
+    visualize_resnet50_layer4_bottleneck0(model, ROOT_DIR, DEVICE)
+
+    print('\nVisualizing layer4-bottleneck1:')
+    visualize_resnet50_layer4_bottleneck1(model, ROOT_DIR, DEVICE)
+
+    print('\nVisualizing layer4-bottleneck2:')
+    visualize_resnet50_layer4_bottleneck2(model, ROOT_DIR, DEVICE)
+
+
+def visualize_dog_classifier():
     DEVICE = get_device()
     model = load_resnet50_layer3_bottleneck5(num_classes=120)
     model = model.to(DEVICE)
@@ -96,3 +118,8 @@ if __name__ == '__main__':
 
     print('\nVisualizing layer4-bottleneck2:')
     visualize_resnet50_layer4_bottleneck2(model, ROOT_DIR, DEVICE)
+
+
+if __name__ == '__main__':
+    visualize_imagenet_classifier()
+    # visualize_dog_classifier()
