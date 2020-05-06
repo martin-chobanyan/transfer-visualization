@@ -42,6 +42,8 @@ class CarModels(Dataset):
         self.train = train
         self.transforms = transforms
         self.data_dir = os.path.join(root_dir, 'cars_train' if train else 'cars_test')
+        self.filenames = os.listdir(self.data_dir)
+        self.label_map = self.load_annotations()
 
     def load_annotations(self):
         mode = 'train' if self.train else 'test'
@@ -53,8 +55,13 @@ class CarModels(Dataset):
             label_map[filename.item()] = label.item()
         return label_map
 
-    def __getitem__(self, item):
-        return item
+    def __getitem__(self, idx):
+        filename = self.filenames[idx]
+        car_model = self.label_map[filename]
+        img = Image.open(os.path.join(self.data_dir, filename))
+        if self.transforms is not None:
+            img = self.transforms(img)
+        return img, car_model
 
     def __len__(self):
-        return
+        return len(self.filenames)
