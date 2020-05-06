@@ -7,7 +7,7 @@ from torchvision.transforms import Compose, Normalize, RandomCrop, RandomHorizon
 from tqdm import tqdm
 
 from feature_vis.transforms import IMAGENET_MEANS, IMAGENET_STDEVS
-from dataset import DogBreedDataset
+from dataset import CarModels
 from train_utils import *
 
 # define the constants
@@ -19,7 +19,7 @@ NUM_EPOCHS = 60
 
 if __name__ == '__main__':
     # define the dog breed dataset
-    root_dir = '/home/mchobanyan/data/kaggle/dog_breeds/'
+    root_dir = '/home/mchobanyan/data/stanford-cars/'
     transforms = Compose([
         RandomCrop(IMAGE_SHAPE, pad_if_needed=True),
         RandomHorizontalFlip(),
@@ -27,3 +27,7 @@ if __name__ == '__main__':
         ToTensor(),
         Normalize(IMAGENET_MEANS, IMAGENET_STDEVS)
     ])
+
+    train_set = CarModels(root_dir, train=True)
+    test_set = CarModels(root_dir, train=False)
+    print(len(test_set.load_annotations()))

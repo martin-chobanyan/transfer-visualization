@@ -2,10 +2,12 @@ import os
 
 from pandas import read_csv
 from PIL import Image
+from scipy.io import loadmat
 from sklearn.preprocessing import LabelEncoder
 from torch.utils.data import Dataset
 
-class DogBreedDataset(Dataset):
+
+class DogBreeds(Dataset):
     def __init__(self, root_dir, transforms=None):
         super().__init__()
         self.root_dir = root_dir
@@ -31,3 +33,28 @@ class DogBreedDataset(Dataset):
 
     def __len__(self):
         return len(self.dog_ids)
+
+
+class CarModels(Dataset):
+    def __init__(self, root_dir, train, transforms=None):
+        super().__init__()
+        self.root_dir = root_dir
+        self.train = train
+        self.transforms = transforms
+        self.data_dir = os.path.join(root_dir, 'cars_train' if train else 'cars_test')
+
+    def load_annotations(self):
+        mode = 'train' if self.train else 'test'
+        mat_data = loadmat(os.path.join(self.root_dir, 'devkit', f'cars_{mode}_annos.mat'))
+        mat_data = mat_data['annotations'].squeeze()
+
+        label_map = dict()
+        for (*_, label, filename) in mat_data:
+            label_map[filename.item()] = label.item()
+        return label_map
+
+    def __getitem__(self, item):
+        return item
+
+    def __len__(self):
+        return

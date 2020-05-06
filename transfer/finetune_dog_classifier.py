@@ -7,7 +7,7 @@ from torchvision.transforms import Compose, Normalize, RandomCrop, RandomHorizon
 from tqdm import tqdm
 
 from feature_vis.transforms import IMAGENET_MEANS, IMAGENET_STDEVS
-from dataset import DogBreedDataset
+from dataset import DogBreeds
 from train_utils import *
 
 # define the constants
@@ -27,7 +27,7 @@ if __name__ == '__main__':
         ToTensor(),
         Normalize(IMAGENET_MEANS, IMAGENET_STDEVS)
     ])
-    dataset = DogBreedDataset(root_dir, transforms)
+    dataset = DogBreeds(root_dir, transforms)
     num_dogs = len(dataset)
     num_breeds = len(dataset.breeds)
 
