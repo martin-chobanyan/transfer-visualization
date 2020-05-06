@@ -44,3 +44,17 @@ if __name__ == '__main__':
     device = get_device()
     model = load_resnet50_layer3_bottleneck5(num_car_models)
     model = model.to(device)
+
+    criterion = nn.CrossEntropyLoss()
+    optimizer = Adam(model.parameters(), lr=LEARNING_RATE)
+
+    # set up the output directory
+    output_dir = '/home/mchobanyan/data/research/transfer/vis/finetune-car-resnet50'
+    create_folder(os.path.join(output_dir, 'models'))
+    logger = TrainingLogger(filepath=os.path.join(output_dir, 'training-log.csv'))
+
+    for epoch in tqdm(range(NUM_EPOCHS)):
+        train_loss, train_acc = train_epoch(model, train_loader, criterion, optimizer, device)
+        test_loss, test_acc = test_epoch(model, test_loader, criterion, device)
+        logger.add_entry(epoch, train_loss, test_loss, train_acc, test_acc)
+        checkpoint(model, os.path.join(output_dir, 'models', f'model_epoch{epoch}.pt'))
