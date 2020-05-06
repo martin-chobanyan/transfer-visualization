@@ -52,7 +52,7 @@ class CarModels(Dataset):
 
         label_map = dict()
         for (*_, label, filename) in mat_data:
-            label_map[filename.item()] = label.item()
+            label_map[filename.item()] = label.item() - 1  # we subtract since the labels start from 1 instead of 0
         return label_map
 
     def __getitem__(self, idx):
