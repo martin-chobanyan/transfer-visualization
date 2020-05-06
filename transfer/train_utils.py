@@ -2,6 +2,7 @@ import os
 from csv import writer as csv_writer
 
 import torch
+from torch.nn import Linear
 import torch.nn.functional as F
 from torchvision.models import resnet50
 
@@ -37,7 +38,7 @@ def load_resnet50_layer3_bottleneck5(num_classes):
     unfreeze_parameters(resnet_model.layer4)
 
     fc_input_dim = resnet_model.fc.in_features
-    new_fc = nn.Linear(fc_input_dim, num_classes)
+    new_fc = Linear(fc_input_dim, num_classes)
     resnet_model.fc = new_fc
 
     return resnet_model
@@ -54,7 +55,7 @@ def load_resnet50_layer4(num_classes):
     unfreeze_parameters(resnet_model.layer4)
 
     fc_input_dim = resnet_model.fc.in_features
-    new_fc = nn.Linear(fc_input_dim, num_classes)
+    new_fc = Linear(fc_input_dim, num_classes)
     resnet_model.fc = new_fc
 
     return resnet_model
