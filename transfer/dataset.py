@@ -36,18 +36,16 @@ class DogBreeds(Dataset):
 
 
 class CarModels(Dataset):
-    def __init__(self, root_dir, train, transforms=None):
+    def __init__(self, root_dir, transforms=None):
         super().__init__()
         self.root_dir = root_dir
-        self.train = train
         self.transforms = transforms
-        self.data_dir = os.path.join(root_dir, 'cars_train' if train else 'cars_test')
-        self.filenames = os.listdir(self.data_dir)
+        self.img_dir = os.path.join(root_dir, 'cars_train')
+        self.filenames = os.listdir(self.img_dir)
         self.label_map = self.load_annotations()
 
     def load_annotations(self):
-        mode = 'train' if self.train else 'test'
-        mat_data = loadmat(os.path.join(self.root_dir, 'devkit', f'cars_{mode}_annos.mat'))
+        mat_data = loadmat(os.path.join(self.root_dir, 'devkit', f'cars_train_annos.mat'))
         mat_data = mat_data['annotations'].squeeze()
 
         label_map = dict()
@@ -58,7 +56,7 @@ class CarModels(Dataset):
     def __getitem__(self, idx):
         filename = self.filenames[idx]
         car_model = self.label_map[filename]
-        img = Image.open(os.path.join(self.data_dir, filename))
+        img = Image.open(os.path.join(self.img_dir, filename))
         if self.transforms is not None:
             img = self.transforms(img)
         return img, car_model
