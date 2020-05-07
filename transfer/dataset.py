@@ -1,10 +1,22 @@
 import os
 
+import numpy as np
 from pandas import read_csv
 from PIL import Image
 from scipy.io import loadmat
 from sklearn.preprocessing import LabelEncoder
 from torch.utils.data import Dataset
+
+
+def is_grayscale(img):
+    return (img.mode == 'L')
+
+
+def grayscale_to_rgb(img):
+    arr = np.array(img)
+    arr = np.expand_dims(arr, -1)
+    arr = np.repeat(arr, 3, axis=-1)
+    return Image.fromarray(arr)
 
 
 class DogBreeds(Dataset):
@@ -57,6 +69,8 @@ class CarModels(Dataset):
         filename = self.filenames[idx]
         car_model = self.label_map[filename]
         img = Image.open(os.path.join(self.img_dir, filename))
+        if is_grayscale(img):
+            img = grayscale_to_rgb(img)
         if self.transforms is not None:
             img = self.transforms(img)
         return img, car_model
