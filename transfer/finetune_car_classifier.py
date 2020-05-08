@@ -14,8 +14,8 @@ from train_utils import *
 IMAGE_SHAPE = (400, 400)
 P_TRAIN = 0.8
 BATCH_SIZE = 100
-LEARNING_RATE = 0.00001
-NUM_EPOCHS = 100
+LEARNING_RATE = 0.0001
+NUM_EPOCHS = 150
 
 if __name__ == '__main__':
     # define the dog breed dataset
@@ -45,6 +45,7 @@ if __name__ == '__main__':
     model = load_resnet50_layer3_bottleneck5(num_car_models)
     model = model.to(device)
 
+    # Driver Version: 418.67
     criterion = nn.CrossEntropyLoss()
     optimizer = Adam(model.parameters(), lr=LEARNING_RATE)
 
