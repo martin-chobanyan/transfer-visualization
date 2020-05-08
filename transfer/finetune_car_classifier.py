@@ -3,6 +3,7 @@ import os
 import torch.nn as nn
 from torch.optim import Adam
 from torch.utils.data import DataLoader, random_split
+from torch.optim.lr_scheduler import MultiplicativeLR
 from torchvision.transforms import Compose, Normalize, RandomCrop, RandomHorizontalFlip, RandomRotation, ToTensor
 from tqdm import tqdm
 
@@ -14,8 +15,9 @@ from train_utils import *
 IMAGE_SHAPE = (400, 400)
 P_TRAIN = 0.8
 BATCH_SIZE = 100
-LEARNING_RATE = 0.0001
-NUM_EPOCHS = 150
+LEARNING_RATE = 0.0005
+LR_DECAY = 0.9
+NUM_EPOCHS = 30
 
 if __name__ == '__main__':
     # define the dog breed dataset
@@ -45,17 +47,19 @@ if __name__ == '__main__':
     model = load_resnet50_layer3_bottleneck5(num_car_models)
     model = model.to(device)
 
-    # Driver Version: 418.67
     criterion = nn.CrossEntropyLoss()
     optimizer = Adam(model.parameters(), lr=LEARNING_RATE)
+    scheduler = MultiplicativeLR(optimizer, lr_lambda=lambda epoch: LR_DECAY)
 
     # set up the output directory
     output_dir = '/home/mchobanyan/data/research/transfer/vis/finetune-car-resnet50'
-    create_folder(os.path.join(output_dir, 'models'))
+    model_dir = os.path.join(output_dir, 'models')
+    create_folder(model_dir)
     logger = TrainingLogger(filepath=os.path.join(output_dir, 'training-log.csv'))
 
     for epoch in tqdm(range(NUM_EPOCHS)):
         train_loss, train_acc = train_epoch(model, train_loader, criterion, optimizer, device)
         test_loss, test_acc = test_epoch(model, test_loader, criterion, device)
+        scheduler.step()
         logger.add_entry(epoch, train_loss, test_loss, train_acc, test_acc)
-        checkpoint(model, os.path.join(output_dir, 'models', f'model_epoch{epoch}.pt'))
+        checkpoint(model, os.path.join(model_dir, f'model_epoch{epoch}.pt'))
