@@ -2,7 +2,11 @@ import os
 from csv import writer as csv_writer
 
 import torch
+from torch.nn import Linear
 import torch.nn.functional as F
+from torchvision.models import resnet50
+
+from feature_vis.utils import freeze_parameters, unfreeze_parameters
 
 
 def create_folder(path):
@@ -20,6 +24,41 @@ def get_device():
     torch.device
     """
     return torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+
+def load_resnet50_layer3_bottleneck5(num_classes):
+    """
+    Loads a pretrained resnet-50, swaps the fully connected layer,
+    and freezes all parameters except for those in layer3.bottleneck5, layer4 and the fully connected layer.
+    """
+    resnet_model = resnet50(pretrained=True)
+    resnet_model = freeze_parameters(resnet_model)
+
+    unfreeze_parameters(resnet_model.layer3[5])
+    unfreeze_parameters(resnet_model.layer4)
+
+    fc_input_dim = resnet_model.fc.in_features
+    new_fc = Linear(fc_input_dim, num_classes)
+    resnet_model.fc = new_fc
+
+    return resnet_model
+
+
+def load_resnet50_layer4(num_classes):
+    """
+    Loads a pretrained resnet-50, swaps the fully connected layer,
+    and freezes all parameters except for those in layer4 and the fully connected layer.
+    """
+    resnet_model = resnet50(pretrained=True)
+    resnet_model = freeze_parameters(resnet_model)
+
+    unfreeze_parameters(resnet_model.layer4)
+
+    fc_input_dim = resnet_model.fc.in_features
+    new_fc = Linear(fc_input_dim, num_classes)
+    resnet_model.fc = new_fc
+
+    return resnet_model
 
 
 class TrainingLogger:
