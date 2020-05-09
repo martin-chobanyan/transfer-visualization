@@ -95,6 +95,7 @@ def visualize_imagenet_classifier():
 
 
 def visualize_dog_classifier():
+    print('Visualizing resnet50 features fine-tuned on the dog breed dataset')
     DEVICE = get_device()
     model = load_resnet50_layer3_bottleneck5(num_classes=120)
     model = model.to(DEVICE)
@@ -120,6 +121,34 @@ def visualize_dog_classifier():
     visualize_resnet50_layer4_bottleneck2(model, ROOT_DIR, DEVICE)
 
 
+def visualize_car_classifier():
+    print('Visualizing resnet50 features fine-tuned on the car model dataset')
+    DEVICE = get_device()
+    model = load_resnet50_layer3_bottleneck5(num_classes=196)
+    model = model.to(DEVICE)
+
+    ROOT_DIR = '/home/mchobanyan/data/research/transfer/vis/finetune-car-resnet50/'
+    model_dir = os.path.join(ROOT_DIR, 'models')
+
+    # load the state of the model at the 30th epoch
+    epoch_idx = 29
+    state_dict = torch.load(os.path.join(model_dir, f'model_epoch{epoch_idx}.pt'))
+    model.load_state_dict(state_dict)
+
+    print('Visualizing layer3-bottleneck5:')
+    visualize_resnet50_layer3_bottleneck5(model, ROOT_DIR, DEVICE)
+
+    print('\nVisualizing layer4-bottleneck0:')
+    visualize_resnet50_layer4_bottleneck0(model, ROOT_DIR, DEVICE)
+    #
+    print('\nVisualizing layer4-bottleneck1:')
+    visualize_resnet50_layer4_bottleneck1(model, ROOT_DIR, DEVICE)
+
+    print('\nVisualizing layer4-bottleneck2:')
+    visualize_resnet50_layer4_bottleneck2(model, ROOT_DIR, DEVICE)
+
+
 if __name__ == '__main__':
     visualize_imagenet_classifier()
-    # visualize_dog_classifier()
+    visualize_dog_classifier()
+    visualize_car_classifier()
