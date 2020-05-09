@@ -1,11 +1,25 @@
 import os
 
+import numpy as np
 from pandas import read_csv
 from PIL import Image
+from scipy.io import loadmat
 from sklearn.preprocessing import LabelEncoder
 from torch.utils.data import Dataset
 
-class DogBreedDataset(Dataset):
+
+def is_grayscale(img):
+    return (img.mode == 'L')
+
+
+def grayscale_to_rgb(img):
+    arr = np.array(img)
+    arr = np.expand_dims(arr, -1)
+    arr = np.repeat(arr, 3, axis=-1)
+    return Image.fromarray(arr)
+
+
+class DogBreeds(Dataset):
     def __init__(self, root_dir, transforms=None):
         super().__init__()
         self.root_dir = root_dir
@@ -31,3 +45,35 @@ class DogBreedDataset(Dataset):
 
     def __len__(self):
         return len(self.dog_ids)
+
+
+class CarModels(Dataset):
+    def __init__(self, root_dir, transforms=None):
+        super().__init__()
+        self.root_dir = root_dir
+        self.transforms = transforms
+        self.img_dir = os.path.join(root_dir, 'cars_train')
+        self.filenames = os.listdir(self.img_dir)
+        self.label_map = self.load_annotations()
+
+    def load_annotations(self):
+        mat_data = loadmat(os.path.join(self.root_dir, 'devkit', f'cars_train_annos.mat'))
+        mat_data = mat_data['annotations'].squeeze()
+
+        label_map = dict()
+        for (*_, label, filename) in mat_data:
+            label_map[filename.item()] = label.item() - 1  # we subtract since the labels start from 1 instead of 0
+        return label_map
+
+    def __getitem__(self, idx):
+        filename = self.filenames[idx]
+        car_model = self.label_map[filename]
+        img = Image.open(os.path.join(self.img_dir, filename))
+        if is_grayscale(img):
+            img = grayscale_to_rgb(img)
+        if self.transforms is not None:
+            img = self.transforms(img)
+        return img, car_model
+
+    def __len__(self):
+        return len(self.filenames)
