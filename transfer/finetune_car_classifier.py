@@ -7,7 +7,7 @@ from torch.optim.lr_scheduler import MultiplicativeLR
 from torchvision.transforms import Compose, Normalize, RandomCrop, RandomHorizontalFlip, RandomRotation, ToTensor
 from tqdm import tqdm
 
-from feature_vis.transforms import IMAGENET_MEANS, IMAGENET_STDEVS
+from feature_vis.transforms import ImagenetNorm
 from dataset import CarModels
 from train_utils import *
 
@@ -27,7 +27,7 @@ if __name__ == '__main__':
         RandomHorizontalFlip(),
         RandomRotation(30),
         ToTensor(),
-        Normalize(IMAGENET_MEANS, IMAGENET_STDEVS)
+        ImagenetNorm()
     ])
     dataset = CarModels(root_dir, transforms=transforms)
     num_cars = len(dataset)

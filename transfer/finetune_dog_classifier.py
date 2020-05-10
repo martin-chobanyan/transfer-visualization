@@ -6,7 +6,7 @@ from torch.utils.data import DataLoader, random_split
 from torchvision.transforms import Compose, Normalize, RandomCrop, RandomHorizontalFlip, RandomRotation, ToTensor
 from tqdm import tqdm
 
-from feature_vis.transforms import IMAGENET_MEANS, IMAGENET_STDEVS
+from feature_vis.transforms import ImagenetNorm
 from dataset import DogBreeds
 from train_utils import *
 
@@ -26,7 +26,7 @@ if __name__ == '__main__':
         RandomHorizontalFlip(),
         RandomRotation(30),
         ToTensor(),
-        Normalize(IMAGENET_MEANS, IMAGENET_STDEVS)
+        ImagenetNorm()
     ])
 
     dataset = DogBreeds(root_dir, transforms)
