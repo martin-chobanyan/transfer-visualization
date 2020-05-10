@@ -61,18 +61,29 @@ def load_resnet50_layer4(num_classes):
     return resnet_model
 
 
-class TrainingLogger:
-    def __init__(self, filepath):
+class Logger:
+    def __init__(self, filepath, header):
         self.filepath = filepath
+        self.header = header
         with open(filepath, 'w') as file:
-            header = ['Epoch', 'Train Loss', 'Test Loss', 'Train Accuracy', 'Test Accuracy']
             writer = csv_writer(file)
             writer.writerow(header)
 
-    def add_entry(self, epoch, train_loss, test_loss, train_acc, test_acc):
+    def add_entry(self, *args):
+        if len(args) != len(self.header):
+            raise ValueError('Entry length must match the header length!')
         with open(self.filepath, 'a') as file:
             writer = csv_writer(file)
-            writer.writerow([epoch, train_loss, test_loss, train_acc, test_acc])
+            writer.writerow(args)
+
+
+class TrainingLogger(Logger):
+    def __init__(self, filepath):
+        header = ['Epoch', 'Train Loss', 'Test Loss', 'Train Accuracy', 'Test Accuracy']
+        super().__init__(filepath, header)
+
+    def add_entry(self, epoch, train_loss, test_loss, train_acc, test_acc):
+        super().add_entry(epoch, train_loss, test_loss, train_acc, test_acc)
 
 
 def accuracy(model_out, true_labels):
