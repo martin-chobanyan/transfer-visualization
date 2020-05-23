@@ -6,7 +6,7 @@ from torch.utils.data import DataLoader, random_split
 from torchvision.transforms import Compose, Normalize, RandomCrop, RandomHorizontalFlip, RandomRotation, ToTensor
 from tqdm import tqdm
 
-from feature_vis.transforms import IMAGENET_MEANS, IMAGENET_STDEVS
+from feature_vis.transforms import ImagenetNorm
 from dataset import DogBreeds
 from train_utils import *
 
@@ -17,6 +17,7 @@ BATCH_SIZE = 100
 LEARNING_RATE = 0.00001
 NUM_EPOCHS = 60
 
+
 if __name__ == '__main__':
     # define the dog breed dataset
     root_dir = '/home/mchobanyan/data/kaggle/dog_breeds/'
@@ -25,8 +26,9 @@ if __name__ == '__main__':
         RandomHorizontalFlip(),
         RandomRotation(30),
         ToTensor(),
-        Normalize(IMAGENET_MEANS, IMAGENET_STDEVS)
+        ImagenetNorm()
     ])
+
     dataset = DogBreeds(root_dir, transforms)
     num_dogs = len(dataset)
     num_breeds = len(dataset.breeds)

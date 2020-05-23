@@ -77,3 +77,33 @@ class CarModels(Dataset):
 
     def __len__(self):
         return len(self.filenames)
+
+
+class ImagePairs(Dataset):
+    def __init__(self, img_dir1, img_dir2, transforms=None):
+        super().__init__()
+        self.img_dir1 = img_dir1
+        self.img_dir2 = img_dir2
+        self.transforms = transforms
+
+        num_imgs1 = len(os.listdir(img_dir1))
+        num_imgs2 = len(os.listdir(img_dir2))
+        self.num_pairs = num_imgs1
+        if num_imgs1 != num_imgs2:
+            raise ValueError('The number of images in each directory should match!')
+
+    def __getitem__(self, idx):
+        path1 = os.path.join(self.img_dir1, f'channel{idx}.png')
+        path2 = os.path.join(self.img_dir2, f'channel{idx}.png')
+
+        img1 = Image.open(path1)
+        img2 = Image.open(path2)
+
+        if self.transforms is not None:
+            img1 = self.transforms(img1)
+            img2 = self.transforms(img2)
+
+        return img1, img2
+
+    def __len__(self):
+        return self.num_pairs
