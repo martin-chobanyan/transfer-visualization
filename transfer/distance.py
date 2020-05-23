@@ -22,23 +22,29 @@ def calc_gram_matrix(features):
 
 class GramMatrixLoss(Module):
     def forward(self, features1, features2):
+        # calculate the gram matrices
         gram1 = calc_gram_matrix(features1)
         gram2 = calc_gram_matrix(features2)
 
+        # calculate the denominator of the scaling factor
         b, c, h, w = features1.size()
-        scale = 1 / (4 * (c ** 2) * ((h * w) ** 2))
-        gram_diff = (gram1 - gram2) ** 2
-        gram_diff = gram_diff.view(b, -1)
-        return scale * torch.sum(gram_diff, dim=1)
+        n_l, m_l = c, h * w  # as defined in the paper
+        scale = 4 * (n_l ** 2) * (m_l ** 2)
+
+        # calculate and scale the sum of sq errors
+        gram_err = (gram1 - gram2) ** 2
+        gram_err = gram_err.view(b, -1)
+        return torch.sum(gram_err, dim=1) / scale
 
 
-class GramMatrixDistance(Module):
+class GramDistanceResnet50(Module):
     def __init__(self, full_model, target_layers=None):
         super().__init__()
         self.target_layers = target_layers
         if self.target_layers is None:
             self.target_layers = ['layer1', 'layer2', 'layer3', 'layer4']
         self.layers = ModuleList(self.group_model_layers(full_model))
+        self.layers.eval()
 
     def group_model_layers(self, full_model):
         final_layers = []
@@ -60,9 +66,10 @@ class GramMatrixDistance(Module):
         losses = []
         for layer in self.layers:
             if isinstance(layer, GramMatrixLoss):
-                losses.append(layer(features1, features2))
+                loss = layer(features1, features2)
+                losses.append(loss)
             else:
                 features1 = layer(features1)
                 features2 = layer(features2)
-        losses = torch.stack(losses).mean(dim=0)
+        losses = torch.stack(losses)
         return losses
