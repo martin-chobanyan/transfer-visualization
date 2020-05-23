@@ -38,12 +38,12 @@ class GramMatrixLoss(Module):
 
 
 class GramDistanceResnet50(Module):
-    def __init__(self, full_model, target_layers=None):
+    def __init__(self, resnet_model, target_layers=None):
         super().__init__()
         self.target_layers = target_layers
         if self.target_layers is None:
             self.target_layers = ['layer1', 'layer2', 'layer3', 'layer4']
-        self.layers = ModuleList(self.group_model_layers(full_model))
+        self.layers = ModuleList(self.group_model_layers(resnet_model))
         self.layers.eval()
 
     def group_model_layers(self, full_model):
