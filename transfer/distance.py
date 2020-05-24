@@ -96,19 +96,13 @@ class GramDistanceVGG19(GramDistanceModel):
 
 
 class GramDistanceResnet50(GramDistanceModel):
-    def __init__(self, target_layers=None):
-        super().__init__()
-        self.target_layers = target_layers
-        if self.target_layers is None:
-            self.target_layers = ['layer1', 'layer2', 'layer3', 'layer4']
-
     def group_model_layers(self):
         final_layers = []
         layer_bank = []
         model = resnet50(pretrained=True)
         for name, child in model.named_children():
             layer_bank.append(child)
-            if name in self.target_layers:
+            if name in ['relu', 'layer1', 'layer2', 'layer3', 'layer4']:
                 final_layers.append(Sequential(*layer_bank))
                 final_layers.append(GramMatrixLoss())
                 layer_bank.clear()
