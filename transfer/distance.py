@@ -1,5 +1,6 @@
 import torch
-from torch.nn import Module, ModuleList, Sequential
+from torch.nn import Conv2d, Module, ModuleList, Sequential
+from torchvision.models import resnet50, vgg19
 
 
 def calc_gram_matrix(features):
@@ -37,27 +38,32 @@ class GramMatrixLoss(Module):
         return torch.sum(gram_err, dim=1) / scale
 
 
-class GramDistanceResnet50(Module):
-    def __init__(self, resnet_model, target_layers=None):
+class GramDistanceModel(Module):
+    def __init__(self):
         super().__init__()
-        self.target_layers = target_layers
-        if self.target_layers is None:
-            self.target_layers = ['layer1', 'layer2', 'layer3', 'layer4']
-        self.layers = ModuleList(self.group_model_layers(resnet_model))
+        self.layers = ModuleList(self.group_model_layers())
         self.layers.eval()
+        self.num_gram_layers = sum(1 for layer in self.layers if isinstance(layer, GramMatrixLoss))
 
-    def group_model_layers(self, full_model):
-        final_layers = []
-        layer_bank = []
-        for name, child in full_model.named_children():
-            layer_bank.append(child)
-            if name in self.target_layers:
-                final_layers.append(Sequential(*layer_bank))
-                final_layers.append(GramMatrixLoss())
-                layer_bank.clear()
-        return final_layers
+    def group_model_layers(self):
+        raise NotImplementedError
 
     def forward(self, img1, img2):
+        """Calculate the Gram matrix distances between pairs of images
+
+        Parameters
+        ----------
+        img1: torch.Tensor
+            The first batch of images as a tensor with shape (batch, channels, height, width)
+        img2: torch.Tensor
+            The second batch of images as a tensor with shape (batch, channels, height, width)
+
+        Returns
+        -------
+        torch.Tensor
+            A tensor containing the Gram matrix distances for each example in the batch with shape
+            (batch, layers), where layers corresponds to the number of GramMatrixLoss layers.
+        """
         if img1.size() != img2.size():
             raise ValueError('Input images to GramMatrixLoss must have the same shape!')
         features1 = img1
@@ -73,3 +79,37 @@ class GramDistanceResnet50(Module):
                 features2 = layer(features2)
         losses = torch.stack(losses)
         return losses
+
+
+class GramDistanceVGG19(GramDistanceModel):
+    def group_model_layers(self):
+        final_layers = []
+        layer_bank = []
+        model = vgg19(pretrained=True).features
+        for child in model.children():
+            layer_bank.append(child)
+            if isinstance(child, Conv2d):
+                final_layers.append(Sequential(*layer_bank))
+                final_layers.append(GramMatrixLoss())
+                layer_bank.clear()
+        return final_layers
+
+
+class GramDistanceResnet50(GramDistanceModel):
+    def __init__(self, target_layers=None):
+        super().__init__()
+        self.target_layers = target_layers
+        if self.target_layers is None:
+            self.target_layers = ['layer1', 'layer2', 'layer3', 'layer4']
+
+    def group_model_layers(self):
+        final_layers = []
+        layer_bank = []
+        model = resnet50(pretrained=True)
+        for name, child in model.named_children():
+            layer_bank.append(child)
+            if name in self.target_layers:
+                final_layers.append(Sequential(*layer_bank))
+                final_layers.append(GramMatrixLoss())
+                layer_bank.clear()
+        return final_layers
