@@ -47,7 +47,7 @@ if __name__ == '__main__':
             score_df = score_df.reset_index(drop=True)
             idx = find_changepoint(score_df['score'].values)
             for channel in score_df.loc[:idx, 'channel']:
-                rows.append({'folder': model_name, 'layer': layer, 'channel': channel})
+                rows.append({'model': model_name, 'layer': layer, 'channel': channel})
 
     # join and save the results
     output_path = os.path.join(ROOT_DIR, 'gray-channels.csv')
@@ -55,6 +55,6 @@ if __name__ == '__main__':
     gray_channels_df.to_csv(output_path, index=False)
 
     # find the number of bad channels per group
-    counts = gray_channels_df.groupby(['folder', 'layer']).count()
+    counts = gray_channels_df.groupby(['model', 'layer']).count()
     counts.columns = ['Bad Channel Count']
     print(gray_channels_df)
