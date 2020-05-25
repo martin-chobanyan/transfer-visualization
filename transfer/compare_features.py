@@ -6,7 +6,7 @@ from torchvision.transforms import Compose, ToTensor
 from tqdm import tqdm
 
 from dataset import ImagePairs
-from distance import GramDistanceResnet50, GramDistanceVGG19, HardCodedGramResnet50
+from distance import GramDistanceResnet50
 from train_utils import create_folder, get_device, Logger
 from feature_vis.transforms import ImagenetNorm
 
@@ -53,9 +53,7 @@ def run(gram_fn, imagenet_dir, target_dir, output_dir):
 
 
 if __name__ == '__main__':
-    # gram_distance_fn = GramDistanceResnet50().to(DEVICE)
-    # gram_distance_fn = GramDistanceVGG19().to(DEVICE)
-    gram_distance_fn = HardCodedGramResnet50().to(DEVICE)
+    gram_distance_fn = GramDistanceResnet50().to(DEVICE)
 
     print('Comparing ImageNet vs Dog Breeds feature visualizations')
     run(gram_distance_fn, IMAGENET_DIR, DOG_DIR, os.path.join(OUTPUT_DIR, 'dogs'))
