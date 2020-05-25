@@ -107,3 +107,48 @@ class GramDistanceResnet50(GramDistanceModel):
                 final_layers.append(GramMatrixLoss())
                 layer_bank.clear()
         return final_layers
+
+
+class HardCodedGramResnet50(GramDistanceModel):
+    def group_model_layers(self):
+        base_model = resnet50(pretrained=True)
+        layers = [
+            base_model.conv1,
+            GramMatrixLoss(),
+            base_model.bn1,
+            base_model.relu,
+            base_model.maxpool,
+            base_model.layer1[0],
+            GramMatrixLoss(),
+            base_model.layer1[1],
+            GramMatrixLoss(),
+            base_model.layer1[2],
+            GramMatrixLoss(),
+            base_model.layer2[0],
+            GramMatrixLoss(),
+            base_model.layer2[1],
+            GramMatrixLoss(),
+            base_model.layer2[2],
+            GramMatrixLoss(),
+            base_model.layer2[3],
+            GramMatrixLoss(),
+            base_model.layer3[0],
+            GramMatrixLoss(),
+            base_model.layer3[1],
+            GramMatrixLoss(),
+            base_model.layer3[2],
+            GramMatrixLoss(),
+            base_model.layer3[3],
+            GramMatrixLoss(),
+            base_model.layer3[4],
+            GramMatrixLoss(),
+            base_model.layer3[5],
+            GramMatrixLoss(),
+            base_model.layer4[0],
+            GramMatrixLoss(),
+            base_model.layer4[1],
+            GramMatrixLoss(),
+            base_model.layer4[2],
+            GramMatrixLoss()
+        ]
+        return layers
