@@ -1,5 +1,6 @@
 import torch
-from torch.nn import Module, ModuleList
+from torch.nn import AdaptiveAvgPool2d, Module, ModuleList
+from torch.nn.functional import cosine_similarity
 from torchvision.models import resnet50
 
 
@@ -119,3 +120,92 @@ class GramDistanceResnet50(Module):
                 features2 = layer(features2)
         losses = torch.stack(losses)
         return losses
+
+
+class CosineSimResnet50(Module):
+    def __init__(self):
+        super().__init__()
+        self.layers = ModuleList(self.prepare_layers())
+        self.layers.eval()
+        self.num_emb_layers = sum(1 for layer in self.layers if isinstance(layer, AdaptiveAvgPool2d))
+
+    def prepare_layers(self):
+        base_model = resnet50(pretrained=True)
+        layers = [
+            base_model.conv1,
+            base_model.bn1,
+            base_model.relu,
+            AdaptiveAvgPool2d((1, 1)),
+            base_model.maxpool,
+            base_model.layer1[0],
+            AdaptiveAvgPool2d((1, 1)),
+            base_model.layer1[1],
+            AdaptiveAvgPool2d((1, 1)),
+            base_model.layer1[2],
+            AdaptiveAvgPool2d((1, 1)),
+            base_model.layer2[0],
+            AdaptiveAvgPool2d((1, 1)),
+            base_model.layer2[1],
+            AdaptiveAvgPool2d((1, 1)),
+            base_model.layer2[2],
+            AdaptiveAvgPool2d((1, 1)),
+            base_model.layer2[3],
+            AdaptiveAvgPool2d((1, 1)),
+            base_model.layer3[0],
+            AdaptiveAvgPool2d((1, 1)),
+            base_model.layer3[1],
+            AdaptiveAvgPool2d((1, 1)),
+            base_model.layer3[2],
+            AdaptiveAvgPool2d((1, 1)),
+            base_model.layer3[3],
+            AdaptiveAvgPool2d((1, 1)),
+            base_model.layer3[4],
+            AdaptiveAvgPool2d((1, 1)),
+            base_model.layer3[5],
+            AdaptiveAvgPool2d((1, 1)),
+            base_model.layer4[0],
+            AdaptiveAvgPool2d((1, 1)),
+            base_model.layer4[1],
+            AdaptiveAvgPool2d((1, 1)),
+            base_model.layer4[2],
+            base_model.avgpool
+        ]
+        return layers
+
+    def forward(self, img1, img2):
+        """Calculate the Gram matrix distances between pairs of images
+
+        Parameters
+        ----------
+        img1: torch.Tensor
+            The first batch of images as a tensor with shape (batch, channels, height, width)
+        img2: torch.Tensor
+            The second batch of images as a tensor with shape (batch, channels, height, width)
+
+        Returns
+        -------
+        torch.Tensor
+            A tensor containing the Gram matrix distances for each example in the batch with shape
+            (batch, layers), where layers corresponds to the number of GramMatrixLoss layers.
+        """
+        if img1.size() != img2.size():
+            raise ValueError('Input images to GramMatrixLoss must have the same shape!')
+        features1 = img1
+        features2 = img2
+
+        cosine_sims = []
+        for layer in self.layers:
+            if isinstance(layer, AdaptiveAvgPool2d):
+                emb1 = layer(features1)
+                emb2 = layer(features2)
+
+                b, c, *_ = emb1.size()
+                emb1 = emb1.view(b, c)
+                emb2 = emb2.view(b, c)
+                cos_sim = cosine_similarity(emb1, emb2)  # shape (b,)
+                cosine_sims.append(cos_sim)
+            else:
+                features1 = layer(features1)
+                features2 = layer(features2)
+        cosine_sims = torch.stack(cosine_sims)  # shape (emb layers, b)
+        return cosine_sims
