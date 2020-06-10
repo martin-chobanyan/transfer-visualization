@@ -227,7 +227,8 @@ def main():
 
         # create a boxplot of the average cosine similarity across the four layers
         fig, ax = plt.subplots(figsize=(14, 7))
-        boxplot(data=concat(data_by_layer), x='layer', y='avg_cos_sim', ax=ax)
+        data_by_layer = concat(data_by_layer).sort_values('layer')  # sort by layer so that the boxplots are in order
+        boxplot(data=data_by_layer, x='layer', y='avg_cos_sim', ax=ax)
         plt.ylim(0.7, 1.0)  # standardize the range across all boxplots
         plt.title(f'Cosine Similarities Across Layers ({domain}s)')
         plt.xlabel('Resnet-50 Layers')
