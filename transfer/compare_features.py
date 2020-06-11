@@ -186,7 +186,7 @@ def main():
             create_folder(most_diff_dir)
             create_folder(most_sim_dir)
 
-            target_cols = [f'cos_sim_layer{i}' for i in range(1, cos_sim_fn.num_emb_layers)]
+            target_cols = [f'cos_sim_layer{i}' for i in range(1, cos_sim_fn.num_emb_layers+1)]
 
             # remove all instances of "gray channels" from the comparisons
             bad_channels = find_gray_channels(domain, layer)
