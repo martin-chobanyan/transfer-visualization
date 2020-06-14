@@ -14,19 +14,23 @@ pip install .
 Once installed, you can generate a feature visualization using the following code:
 ```python
 from feature_vis.render import FeatureVisualizer
+
+import torch
 from torchvision.models import resnet50
 
 # load a pre-trained model
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model = resnet50(pretrained=True)
 model.eval()
+model.to(device)
 
 # set up the visualizer
-visualize = FeatureVisualizer(model)
+visualize = FeatureVisualizer(model, device=device)
 
 # create the feature visualization as a PIL image
 img = visualize(act_idx=309)
 ```
-The snippet above produces the feature visualization for the activation of the 309th index in resnet50's output vector. This corresponds to the "bee" class in ImageNet and the resulting feature visualization can be seen below:  
+The snippet above produces the feature visualization for the activation of the 309th index in resnet50's output vector. This corresponds to the "bee" class in ImageNet and the resulting feature visualization can be seen below. The user can configure the learning rate, number of iterations, image shape, and more.  
 ![Bee feature visualization](https://raw.githubusercontent.com/martin-chobanyan/transfer-visualization/master/resources/bee-visualization.png)
 
 The easiest way to specify the target activation is to alter the model such that it outputs the target layer and then specify the index within the resulting activation vector or volume. Note, if the layer outputs a volume then the target activation is the average of the i-th feature map in the volume. Pytorch hooks can also be used isolate the target activation. See the docstrings in the code and the example notebooks for more details.  
