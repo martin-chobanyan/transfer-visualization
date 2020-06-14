@@ -20,7 +20,15 @@ model.eval()
 # set up the visualizer
 visualize = FeatureVisualizer(model)
 
-# create the feature visualization
+# create the feature visualization as a PIL image
 img = visualize(act_idx=309)
 ```
-The snippet above produces the feature visualization of the 
+The snippet above produces the feature visualization for the activation of the 309th index in resnet50's output vector. This corresponds to the "bee" class in ImageNet and the resulting feature visualization can be seen below:  
+![Bee feature visualization](https://raw.githubusercontent.com/martin-chobanyan/transfer-visualization/master/resources/bee-visualization.png)
+
+The easiest way to specify the target activation is to alter the model such that it outputs the target layer and then specify the index within the resulting activation vector or volume. Note, if the layer outputs a volume then the target activation is the average of the i-th feature map in the volume. Pytorch hooks can also be used isolate the target activation. See the docstrings in the code and the example notebooks for more details.  
+
+Note, this is only a partial implementation of feature visualization as described in this [distill article](https://distill.pub/2017/feature-visualization/). Only the parts necessary for this project were converted to pytorch from lucid library.
+
+## transfer
+...
