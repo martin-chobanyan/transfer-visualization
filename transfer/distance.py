@@ -1,5 +1,6 @@
+"""This file contains callable objects which calculate the distance or similarity between two input images"""
 import torch
-from torch.nn import AdaptiveAvgPool2d, Module, ModuleList, Sequential
+from torch.nn import Module, ModuleList, Sequential
 from torch.nn.functional import cosine_similarity
 from torchvision.models import resnet50
 
@@ -10,6 +11,7 @@ from torchvision.models import resnet50
 
 
 class CosineSimResnet50(Module):
+    """Calculate the cosine similarity of two images using their ResNet50 embeddings before the fully connected layer"""
     def __init__(self):
         super().__init__()
         self.resnet_cnn = Sequential(*list(resnet50(pretrained=True).children())[:-1])
@@ -65,6 +67,7 @@ def calc_gram_matrix(features):
 
 
 class GramMatrixLoss(Module):
+    """Calculate the difference in the Gram Matrix representation of two input feature volumes"""
     def forward(self, features1, features2):
         # calculate the gram matrices
         gram1 = calc_gram_matrix(features1)
@@ -82,6 +85,7 @@ class GramMatrixLoss(Module):
 
 
 class GramDistanceResnet50(Module):
+    """A module which calculates the GramMatrixLoss of two images after every bottleneck layer in ResNet50"""
     def __init__(self):
         super().__init__()
         self.layers = ModuleList(self.prepare_layers())
@@ -89,6 +93,7 @@ class GramDistanceResnet50(Module):
         self.num_gram_layers = sum(1 for layer in self.layers if isinstance(layer, GramMatrixLoss))
 
     def prepare_layers(self):
+        """Insert GramMatrixLoss layers after every bottleneck layer in the Resnet50 architecture"""
         base_model = resnet50(pretrained=True)
         layers = [
             base_model.conv1,
