@@ -1,3 +1,4 @@
+"""Utility classes and functions for training a neural network"""
 import os
 from csv import writer as csv_writer
 
@@ -10,14 +11,13 @@ from feature_vis.utils import freeze_parameters, unfreeze_parameters
 
 
 def create_folder(path):
+    """Create a folder if it does not already exist"""
     if not (os.path.exists(path) or os.path.isdir(path)):
         os.makedirs(path, exist_ok=True)
 
 
 def get_device():
     """Get the cuda device if it is available
-
-    Note: this assumes that there is only one GPU device
 
     Returns
     -------
@@ -27,9 +27,20 @@ def get_device():
 
 
 def load_resnet50_layer3_bottleneck5(num_classes):
-    """
-    Loads a pretrained resnet-50, swaps the fully connected layer,
+    """Prepare the base ResNet-50 network
+
+    Loads a pre-trained ResNet-50,
+    swaps the fully connected layer with one which outputs `num_classes` dimensions,
     and freezes all parameters except for those in layer3.bottleneck5, layer4 and the fully connected layer.
+
+    Parameters
+    ----------
+    num_classes: int
+        The dimension for the output vector
+
+    Returns
+    -------
+    torchvision.models.ResNet
     """
     resnet_model = resnet50(pretrained=True)
     resnet_model = freeze_parameters(resnet_model)
@@ -44,24 +55,16 @@ def load_resnet50_layer3_bottleneck5(num_classes):
     return resnet_model
 
 
-def load_resnet50_layer4(num_classes):
-    """
-    Loads a pretrained resnet-50, swaps the fully connected layer,
-    and freezes all parameters except for those in layer4 and the fully connected layer.
-    """
-    resnet_model = resnet50(pretrained=True)
-    resnet_model = freeze_parameters(resnet_model)
-
-    unfreeze_parameters(resnet_model.layer4)
-
-    fc_input_dim = resnet_model.fc.in_features
-    new_fc = Linear(fc_input_dim, num_classes)
-    resnet_model.fc = new_fc
-
-    return resnet_model
-
-
 class Logger:
+    """A CSV logger
+
+    Parameters
+    ----------
+    filepath: str
+        The filepath where the logger will be created.
+    header: list[str]
+        The columns for the CSV file as a list of strings
+    """
     def __init__(self, filepath, header):
         self.filepath = filepath
         self.header = header
@@ -70,6 +73,9 @@ class Logger:
             writer.writerow(header)
 
     def add_entry(self, *args):
+        """Append a row to the CSV file
+        The arguments for this function must match the length and order of the initialized headers.
+        """
         if len(args) != len(self.header):
             raise ValueError('Entry length must match the header length!')
         with open(self.filepath, 'a') as file:
@@ -78,11 +84,21 @@ class Logger:
 
 
 class TrainingLogger(Logger):
+    """An extension of the Logger class for training a classifier
+
+    The headers are fixed to include: 'Epoch', 'Train Loss', 'Test Loss', 'Train Accuracy', and 'Test Accuracy'
+
+    Parameters
+    ----------
+    filepath: str
+        The filepath where the logger will be created
+    """
     def __init__(self, filepath):
         header = ['Epoch', 'Train Loss', 'Test Loss', 'Train Accuracy', 'Test Accuracy']
         super().__init__(filepath, header)
 
     def add_entry(self, epoch, train_loss, test_loss, train_acc, test_acc):
+        """Append a row to the CSV file"""
         super().add_entry(epoch, train_loss, test_loss, train_acc, test_acc)
 
 
@@ -92,9 +108,9 @@ def accuracy(model_out, true_labels):
     Parameters
     ----------
     model_out: torch.FloatTensor
-        The output of the emotion classifier with shape [batch size, num emotions]
+        The output of the classifier with shape (batch size, number of classes)
     true_labels: torch.LongTensor
-        The true encoded emotion labels aligned with the model's output
+        The true labels aligned with the model's output with shape (batch size,)
 
     Returns
     -------
@@ -106,7 +122,7 @@ def accuracy(model_out, true_labels):
 
 
 def train_epoch(model, dataloader, criterion, optimizer, device):
-    """Train the model for an epoch
+    """Train a neural network for a single epoch
 
     Parameters
     ----------
@@ -118,8 +134,8 @@ def train_epoch(model, dataloader, criterion, optimizer, device):
 
     Returns
     -------
-    float
-        The average loss
+    tuple[float]
+        A tuple containing the average training loss and accuracy for this epoch
     """
     avg_loss = []
     avg_acc = []
@@ -139,7 +155,7 @@ def train_epoch(model, dataloader, criterion, optimizer, device):
 
 
 def test_epoch(model, dataloader, criterion, device):
-    """Run the model for a validation epoch
+    """Test a neural network for a single epoch
 
     Parameters
     ----------
@@ -150,8 +166,8 @@ def test_epoch(model, dataloader, criterion, device):
 
     Returns
     -------
-    float, float
-        The average loss and the average accuracy
+    tuple[float]
+        A tuple containing the average testing loss and accuracy for this epoch
     """
     avg_loss = []
     avg_acc = []
