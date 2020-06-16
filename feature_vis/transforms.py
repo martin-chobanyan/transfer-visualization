@@ -1,6 +1,4 @@
-"""
-This module provides helper objects for transforming image tensors using the kornia library.
-"""
+"""This module provides helper objects for transforming image tensors using the kornia library."""
 
 import random
 import torch
@@ -14,6 +12,7 @@ IMAGENET_STDEVS = [0.229, 0.224, 0.225]
 
 
 class ImagenetNorm(Normalize):
+    """Normalize an image using the standard ImageNet channel means and standard deviations"""
     def __init__(self):
         super().__init__(mean=IMAGENET_MEANS, std=IMAGENET_STDEVS)
 
@@ -34,15 +33,33 @@ def get_default_transforms(device):
 
 
 class AddBatchDim:
+    """Add an extra dimension to a tensor (first dimension)"""
     def __call__(self, t):
         return t.unsqueeze(0)
 
 
 class CropTensorPadding:
+    """Trim the padding of a tensor
+
+    Parameters
+    ----------
+    padding: int
+        The number of pixels to trim on each side of the tensor
+    """
     def __init__(self, padding):
         self.padding = padding
 
     def __call__(self, x):
+        """
+        Parameters
+        ----------
+        x: torch.Tensor
+            The target tensor with shape (..., height, width)
+
+        Returns
+        -------
+        torch.Tensor
+        """
         p = self.padding
         x = x[..., p:-p, p:-p]
         return x

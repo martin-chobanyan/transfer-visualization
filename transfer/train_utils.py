@@ -16,16 +16,6 @@ def create_folder(path):
         os.makedirs(path, exist_ok=True)
 
 
-def get_device():
-    """Get the cuda device if it is available
-
-    Returns
-    -------
-    torch.device
-    """
-    return torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-
 def load_resnet50_layer3_bottleneck5(num_classes):
     """Prepare the base ResNet-50 network
 

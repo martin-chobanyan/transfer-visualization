@@ -9,6 +9,7 @@ from torchvision.transforms import Compose, Normalize, RandomCrop, RandomHorizon
 from tqdm import tqdm
 
 from feature_vis.transforms import ImagenetNorm
+from feature_vis.utils import get_device
 from dataset import CarModels
 from train_utils import *
 

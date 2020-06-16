@@ -23,8 +23,9 @@ from tqdm import tqdm
 
 from dataset import ImagePairs
 from distance import CosineSimResnet50
-from train_utils import create_folder, get_device, Logger
+from train_utils import create_folder, Logger
 from feature_vis.transforms import ImagenetNorm
+from feature_vis.utils import get_device
 
 # define the constants
 DOMAINS = ['car', 'dog']

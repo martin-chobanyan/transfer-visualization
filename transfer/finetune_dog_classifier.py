@@ -8,6 +8,7 @@ from torchvision.transforms import Compose, RandomCrop, RandomHorizontalFlip, Ra
 from tqdm import tqdm
 
 from feature_vis.transforms import ImagenetNorm
+from feature_vis.utils import get_device
 from dataset import DogBreeds
 from train_utils import *
 

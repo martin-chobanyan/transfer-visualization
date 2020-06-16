@@ -6,9 +6,9 @@ from torchvision.models import resnet50
 from tqdm import tqdm
 
 from feature_vis.render import FeatureVisualizer
-from feature_vis.utils import slice_model
+from feature_vis.utils import slice_model, get_device
 from finetune_dog_classifier import load_resnet50_layer3_bottleneck5, IMAGE_SHAPE
-from train_utils import create_folder, get_device
+from train_utils import create_folder
 
 # define the directories as constants
 ROOT_DIR = '/home/mchobanyan/data/research/transfer/vis/'
