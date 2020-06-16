@@ -1,8 +1,9 @@
 # pycharm
 .idea/
 
-# notebooks
-*.ipynb
+# test notebooks
+test*.ipynb
+.ipynb_checkpoints
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
