@@ -3,7 +3,7 @@ In this project the change in a deep neural network as it is fine-tuned towards 
 
 There are two main parts to this repo:
 - **feature_vis**: a python package which is a partial pytorch implementation of the tensorflow feature visualization library [lucid](https://github.com/tensorflow/lucid).
-- **transfer**: a set of python scripts which perform the fine-tuning task, generate the feature visualizations using `feature_vis`, and compares the change in the resulting visualizations.
+- **transfer**: a collection of python scripts which perform the fine-tuning task, generate the feature visualizations using `feature_vis`, and compare the change in the resulting visualizations.
 
 ## feature_vis
 
