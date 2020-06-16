@@ -1,3 +1,4 @@
+"""This script fine-tunes ResNet-50 pre-trained on ImageNet to the Stanford Car Dataset"""
 import os
 
 import torch.nn as nn
@@ -8,6 +9,7 @@ from torchvision.transforms import Compose, Normalize, RandomCrop, RandomHorizon
 from tqdm import tqdm
 
 from feature_vis.transforms import ImagenetNorm
+from feature_vis.utils import get_device
 from dataset import CarModels
 from train_utils import *
 
@@ -20,8 +22,9 @@ LR_DECAY = 0.9
 NUM_EPOCHS = 30
 
 if __name__ == '__main__':
-    # define the dog breed dataset
+    # root directory of the car dataset
     root_dir = '/home/mchobanyan/data/stanford-cars/'
+
     transforms = Compose([
         RandomCrop(IMAGE_SHAPE, pad_if_needed=True),
         RandomHorizontalFlip(),
@@ -29,6 +32,8 @@ if __name__ == '__main__':
         ToTensor(),
         ImagenetNorm()
     ])
+
+    # define the dataset class
     dataset = CarModels(root_dir, transforms=transforms)
     num_cars = len(dataset)
     num_car_models = len(set(dataset.label_map.values()))
@@ -42,7 +47,8 @@ if __name__ == '__main__':
     train_loader = DataLoader(train_data, batch_size=BATCH_SIZE, shuffle=True)
     test_loader = DataLoader(test_data, batch_size=BATCH_SIZE, shuffle=False)
 
-    # set up the model
+    # load ResNet-50 with every layer frozen except for layer3-bottleneck5 and beyond,
+    # and a new fully-connected network which outputs a 196-dim vector
     device = get_device()
     model = load_resnet50_layer3_bottleneck5(num_car_models)
     model = model.to(device)
@@ -51,7 +57,7 @@ if __name__ == '__main__':
     optimizer = Adam(model.parameters(), lr=LEARNING_RATE)
     scheduler = MultiplicativeLR(optimizer, lr_lambda=lambda epoch: LR_DECAY)
 
-    # set up the output directory
+    # set up the output logger
     output_dir = '/home/mchobanyan/data/research/transfer/vis/finetune-car-resnet50'
     model_dir = os.path.join(output_dir, 'models')
     create_folder(model_dir)
