@@ -54,3 +54,5 @@ This script calculates the embedding cosine similarity between the respective ch
 This file provides pytorch Dataset classes which help index and load the datasets used in this project.
 #### distance.py (non-executable)
 This file defines the cosine similarity metric (and the gram matrix distance) between two feature visualizations.
+#### train_utils.py (non-executable)
+This file provides several utility functions to help train a pytorch neural network.
