@@ -71,6 +71,5 @@ class FourierParam:
 
         image_shape = (self.height, self.width)
         image = torch.irfft(init_val, signal_ndim=2, normalized=True, onesided=True, signal_sizes=image_shape)
-        # image = torch.irfft(init_val, signal_ndim=2, normalized=True, signal_sizes=image_shape)
         image /= 4.0  # the four here is a magic number defined in the lucid implementation
         return image

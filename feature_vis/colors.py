@@ -11,6 +11,15 @@ COLOR_CORRELATION_SVD_SQRT = np.asarray([[0.26, 0.09, 0.02],
 
 
 class DecorrelateColors:
+    """Decorrelate the colors in an RGB image
+
+    Parameters
+    ----------
+    color_corr_svd_sqrt: np.ndarray, optional
+        The color correlation matrix (defualt is to use the pre-calculated matrix for ImageNet)
+    device: str or torch.device, optional
+        The pytorch device (default is cpu)
+    """
     def __init__(self, color_corr_svd_sqrt=COLOR_CORRELATION_SVD_SQRT, device='cpu'):
         self.device = device
         self.color_corr_svd_sqrt = color_corr_svd_sqrt
@@ -27,5 +36,17 @@ class DecorrelateColors:
         return t
 
     def __call__(self, t):
+        """Decorrelate colors
+
+        Parameters
+        ----------
+        t: torch.FloatTensor
+            The input image as a pytorch tensor with shape (channels, height, width)
+
+        Returns
+        -------
+        torch.FloatTensor
+            The image as a pytorch tensor with shape (height, width, channels) and values in range (0, 1)
+        """
         t = self.__linear_decorrelate_colors(t)
         return torch.sigmoid(t)
