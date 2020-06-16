@@ -39,18 +39,18 @@ Note, this is only a partial implementation of feature visualization as describe
 
 ## transfer
 The "transfer" directory contains scripts for recreating this project. Here is a description for each script, in the order that they should be executed:
-### finetune_dog_classifier.py
+#### finetune_dog_classifier.py
 This script fine-tunes a ResNet-50 network pre-trained on ImageNet to the [Stanford Dog Dataset](http://vision.stanford.edu/aditya86/ImageNetDogs/). The state of the model is saved at each epoch.
 Note, this project uses the version of this [dataset hosted by Kaggle](https://www.kaggle.com/c/dog-breed-identification/data), not the source linked above.
-### finetune_car_classifier.py
+#### finetune_car_classifier.py
 This script repeats the steps of "finetune_dog_classifier" but the target dataset is instead the [Stanford Car Dataset](https://ai.stanford.edu/~jkrause/cars/car_dataset.html). 
-### visualize.py
+#### visualize.py
 This script creates and saves the feature visualizations for the base network, the fine-tuned dog network, and the fine-tuned car network.
-### find_bad_channels.py
+#### find_bad_channels.py
 This script identifies the channels in each of the fine-tuned networks which resulted in faulty, gray feature visualizations. A CSV file is created containing the information.
-### compare_features.py
+#### compare_features.py
 This script calculates the embedding cosine similarity between the respective channels of the base network + the dog network and the base network + the car network.
-### dataset.py (non-executable)
+#### dataset.py (non-executable)
 This file provides pytorch Dataset classes which help index and load the datasets used in this project.
-### distance.py (non-executable)
+#### distance.py (non-executable)
 This file defines the cosine similarity metric (and the gram matrix distance) between two feature visualizations.
