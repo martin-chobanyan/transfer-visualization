@@ -38,7 +38,8 @@ The easiest way to specify the target activation is to alter the model such that
 Note, this is only a partial implementation of feature visualization as described in this [distill article](https://distill.pub/2017/feature-visualization/). Only the parts necessary for this project were converted to pytorch from lucid library.
 
 ## transfer
-The "transfer" directory contains scripts for recreating this project. Here is a description for each script, in the order that they should be executed:
+![Feature visualization change example](https://raw.githubusercontent.com/martin-chobanyan/transfer-visualization/master/resources/rank14_channel1276.png)  
+The **transfer** directory contains scripts for recreating this project. Here is a description for each script, in the order that they should be executed:
 #### finetune_dog_classifier.py
 This script fine-tunes a ResNet-50 network pre-trained on ImageNet to the [Stanford Dog Dataset](http://vision.stanford.edu/aditya86/ImageNetDogs/). The state of the model is saved at each epoch.
 Note, this project uses the version of this [dataset hosted by Kaggle](https://www.kaggle.com/c/dog-breed-identification/data), not the source linked above.
