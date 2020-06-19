@@ -1,5 +1,5 @@
 # Visualizing change in a neural network
-In this project the change in a deep neural network as it is fine-tuned towards a new task is assessed using feature visualization. For a detailed description of this project, see this [blog post](add link here once the article is published).
+In this project the change in a deep neural network as it is fine-tuned towards a new task is assessed using feature visualization. For a detailed description of this project, see this [blog post](https://towardsdatascience.com/visualizing-change-in-neural-networks-eea86529a9f3).
 
 There are two main parts to this repo:
 - **feature_vis**: a python package which is a partial pytorch implementation of the tensorflow feature visualization library [lucid](https://github.com/tensorflow/lucid).
