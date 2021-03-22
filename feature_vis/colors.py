@@ -28,9 +28,9 @@ class DecorrelateColors:
 
     def __linear_decorrelate_colors(self, t):
         c, h, w = t.shape
-        assert c == 3, 'Input tensor must have three channels!'
+        # assert c == 3, 'Input tensor must have three channels!'
         t_flat = t.permute(1, 2, 0)
-        t_flat = t_flat.view(-1, 3)
+        t_flat = t_flat.view(-1, c)
         t_flat = torch.matmul(t_flat, self.normalized_color_corr.T)
         t = t_flat.view((h, w, c)).permute(2, 0, 1)
         return t
