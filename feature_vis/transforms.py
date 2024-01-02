@@ -1,10 +1,13 @@
 """This module provides helper objects for transforming image tensors using the kornia library."""
 
 import random
+
+import numpy as np
 import torch
+from kornia.geometry import rotate, scale, translate
 from torch.nn import ReflectionPad2d
 from torchvision.transforms import Compose, Normalize
-from kornia.geometry import rotate, scale, translate
+
 from .utils import torch_uniform
 
 IMAGENET_MEANS = [0.485, 0.456, 0.406]
@@ -84,7 +87,7 @@ class RotateTensor:
     def __call__(self, x):
         batch_size = x.size(0)
         angles = random.choices(self.angles, k=batch_size)
-        angles = torch.tensor(angles).to(self.device)
+        angles = torch.FloatTensor(angles, device=self.device)
         return rotate(x, angles)
 
 
@@ -106,7 +109,7 @@ class ScaleTensor:
     def __call__(self, x):
         batch_size = x.size(0)
         scale_factors = random.choices(self.scale_factors, k=batch_size)
-        scale_factors = torch.tensor(scale_factors).to(self.device)
+        scale_factors = torch.FloatTensor(scale_factors, device=self.device)
         return scale(x, scale_factors)
 
 

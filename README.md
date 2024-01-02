@@ -7,11 +7,21 @@ There are two main parts to this repo:
 
 ## feature_vis
 
-To install this package locally, simply run the following from the root level of this project:
+To install this package locally, first install all of the requirements using the following command:
+
+```bash
+conda install pytorch=1.6.0 torchvision=0.7.0 kornia=0.5.8 tqdm=4.65.0 -c pytorch -c conda-forge
+```
+
+and then simply run the following from the root level of this project:
+
 ```
 pip install .
 ```
+>  :warning: This project will need to be updated to use the newer `torch.fft` API introduced in PyTorch 1.7+. For now the version is pinned to 1.6.0.
+
 Once installed, you can generate a feature visualization using the following code:
+
 ```python
 from feature_vis.render import FeatureVisualizer
 
