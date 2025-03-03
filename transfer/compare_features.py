@@ -28,20 +28,21 @@ from feature_vis.transforms import ImagenetNorm
 from feature_vis.utils import get_device
 
 # define the constants
-DOMAINS = ['car', 'dog']
+# DOMAINS = ['car', 'dog']
+DOMAINS = ['dog']
 ROOT_DIR = '/home/mchobanyan/data/research/transfer/vis/'
 IMAGENET_DIR = os.path.join(ROOT_DIR, 'pretrained-resnet50')
 COMPARISON_DIR = os.path.join(ROOT_DIR, 'comparisons')
 CAR_DIR = os.path.join(ROOT_DIR, f'finetune-car-resnet50')
 DOG_DIR = os.path.join(ROOT_DIR, f'finetune-dog-resnet50')
 
-MOST_DIFFERENT_DIR = os.path.join(ROOT_DIR, 'most-different')
-MOST_SIMILAR_DIR = os.path.join(ROOT_DIR, 'most-similar')
+MOST_DIFFERENT_DIR = os.path.join(ROOT_DIR, 'temp', 'most-different')
+# MOST_SIMILAR_DIR = os.path.join(ROOT_DIR, 'most-similar')
 GRAY_CHANNELS_PATH = '/home/mchobanyan/data/research/transfer/vis/gray-channels.csv'
 
 LAYERS = ['layer3-bottleneck5', 'layer4-bottleneck0', 'layer4-bottleneck1', 'layer4-bottleneck2']
 DEVICE = get_device()
-K = 20
+K = 200
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -202,10 +203,10 @@ def set_plot_configs():
 
 def main():
     # Create the cosine similarity CSV files
-    print('Comparing ImageNet vs Dog Breeds feature visualizations with cosine similarity')
-    calculate_cosine_similarities(DOG_DIR, output_dir=os.path.join(COMPARISON_DIR, 'dog'))
-    print('\nComparing ImageNet vs Car Models feature visualizations with cosine similarity')
-    calculate_cosine_similarities(CAR_DIR, output_dir=os.path.join(COMPARISON_DIR, 'car'))
+    # print('Comparing ImageNet vs Dog Breeds feature visualizations with cosine similarity')
+    # calculate_cosine_similarities(DOG_DIR, output_dir=os.path.join(COMPARISON_DIR, 'dog'))
+    # print('\nComparing ImageNet vs Car Models feature visualizations with cosine similarity')
+    # calculate_cosine_similarities(CAR_DIR, output_dir=os.path.join(COMPARISON_DIR, 'car'))
 
     # instantiate the helper object to find the "gray channels" given the model and layer
     find_gray_channels = GrayChannelIdx(read_csv(GRAY_CHANNELS_PATH))
@@ -226,9 +227,9 @@ def main():
             target_dir = os.path.join(CAR_DIR if domain == 'car' else DOG_DIR, 'features', layer)
 
             most_diff_dir = os.path.join(MOST_DIFFERENT_DIR, domain, layer)
-            most_sim_dir = os.path.join(MOST_SIMILAR_DIR, domain, layer)
+            # most_sim_dir = os.path.join(MOST_SIMILAR_DIR, domain, layer)
             create_folder(most_diff_dir)
-            create_folder(most_sim_dir)
+            # create_folder(most_sim_dir)
 
             # remove all instances of "gray channels" from the comparisons
             bad_channels = find_gray_channels(domain, layer)
@@ -245,33 +246,33 @@ def main():
             # retrieve the top-k and bottom-k channels with respect to their cosine similarities
             # low cosine similarity --> channels are different
             # high cosine similarity --> channels are similar
-            num_channels = len(cosine_sims)
+            # num_channels = len(cosine_sims)
             furthest_channels = cosine_sims.loc[:K, 'channel'].values
-            closest_channels = cosine_sims.loc[num_channels - K:, 'channel'].values[::-1]
+            # closest_channels = cosine_sims.loc[num_channels - K:, 'channel'].values[::-1]
 
-            for rank, channel_idx in enumerate(furthest_channels):
+            for rank, channel_idx in enumerate(tqdm(furthest_channels)):
                 channel_name = f'channel{channel_idx}.png'
                 img1 = Image.open(os.path.join(imagenet_dir, channel_name))
                 img2 = Image.open(os.path.join(target_dir, channel_name))
                 img = concat_horizontally(img1, img2)
                 img.save(os.path.join(most_diff_dir, f'rank{rank}_{channel_name}'))
 
-            for rank, channel_idx in enumerate(closest_channels):
-                channel_name = f'channel{channel_idx}.png'
-                img1 = Image.open(os.path.join(imagenet_dir, channel_name))
-                img2 = Image.open(os.path.join(target_dir, channel_name))
-                img = concat_horizontally(img1, img2)
-                img.save(os.path.join(most_sim_dir, f'rank{rank}_{channel_name}'))
+            # for rank, channel_idx in enumerate(closest_channels):
+            #     channel_name = f'channel{channel_idx}.png'
+            #     img1 = Image.open(os.path.join(imagenet_dir, channel_name))
+            #     img2 = Image.open(os.path.join(target_dir, channel_name))
+            #     img = concat_horizontally(img1, img2)
+            #     img.save(os.path.join(most_sim_dir, f'rank{rank}_{channel_name}'))
 
         # create a boxplot of the average cosine similarity across the four layers
-        set_plot_configs()
-        fig, ax = plt.subplots(figsize=(14, 7))
-        data_by_layer = concat(data_by_layer).sort_values('layer')  # sort by layer so that the boxplots are in order
-        boxplot(data=data_by_layer, x='layer', y='cosine_sim', ax=ax)
-        plt.title(f'Cosine Similarities Across Layers ({domain}s)')
-        plt.xlabel('Resnet-50 Layers')
-        plt.ylabel('Cosine Similarity')
-        plt.show()
+        # set_plot_configs()
+        # fig, ax = plt.subplots(figsize=(14, 7))
+        # data_by_layer = concat(data_by_layer).sort_values('layer')  # sort by layer so that the boxplots are in order
+        # boxplot(data=data_by_layer, x='layer', y='cosine_sim', ax=ax)
+        # plt.title(f'Cosine Similarities Across Layers ({domain}s)')
+        # plt.xlabel('Resnet-50 Layers')
+        # plt.ylabel('Cosine Similarity')
+        # plt.show()
     print('Done!')
 
 

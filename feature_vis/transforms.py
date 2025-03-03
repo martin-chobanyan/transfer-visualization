@@ -87,7 +87,7 @@ class RotateTensor:
     def __call__(self, x):
         batch_size = x.size(0)
         angles = random.choices(self.angles, k=batch_size)
-        angles = torch.FloatTensor(angles, device=self.device)
+        angles = torch.tensor(angles, device=self.device)
         return rotate(x, angles)
 
 
@@ -109,7 +109,7 @@ class ScaleTensor:
     def __call__(self, x):
         batch_size = x.size(0)
         scale_factors = random.choices(self.scale_factors, k=batch_size)
-        scale_factors = torch.FloatTensor(scale_factors, device=self.device)
+        scale_factors = torch.tensor(scale_factors, device=self.device)
         return scale(x, scale_factors)
 
 
